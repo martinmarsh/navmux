@@ -1,0 +1,50 @@
+
+compass:
+    name: "com4"
+    type: "serial"
+    baud:  4500
+    outputs:
+      - "to_log"
+      - "to_helm"
+      - "to_2000"
+      - "to_udp_server"
+
+bridge:
+    name: "com5"
+    type: "serial"
+    baud: 38400
+    input: "to_2000"
+    outputs:
+      - "to_log"
+      - "to_udp_server"
+      - "to_0183_gps"
+
+ais:
+    name: "com7"
+    type: "serial"
+    baud: 38400
+    outputs:
+      - "to_2000"
+      - "to_udp_server"
+
+gps:
+    name: "com6"
+    type: "serial"
+    baud: 9600
+    input: to_0183_gps
+    outputs:
+      - "to_log"
+      - "to_udp_server"
+
+log:
+    type: ships_log
+    input: "to_log"
+
+udp:
+    type:  "udp_server"
+    input: "to_udp_server"
+
+helm:
+    type: auto-helm
+    input: to_helm
+
