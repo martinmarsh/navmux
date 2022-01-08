@@ -13,22 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-/*
-
-func serial(port string, name string, baud int64, output []string, channels map[string](chan string)) {
-	ever := true
-	str := ""
-	i := 1
-	for ever {
-		str = fmt.Sprintf("%s %s %d %d", port, name, baud, i)
-		i += 1
-		for _, out := range output {
-			channels[out] <- str
-			time.Sleep(10 * time.Millisecond)
-		}
-	}
-}
-*/
 
 func loadConfig() *mux.ConfigData {
 
@@ -61,13 +45,10 @@ func loadConfig() *mux.ConfigData {
 		TypeList: make(map[string]([]string)),
 		Values:   make(map[string]([]string)),
 	}
-	//index := make(map[string]([]string))
-	//type_list := make(map[string]([]string))
 
 	// Find keys in yaml assumes >2 deep collects map by 1st part of key
 	// also find names by device type every section has a type
 	for _, k := range all {
-		fmt.Println(k)
 		key := strings.SplitN(k, ".", 2)
 		if _, ok := confData.Values[k]; !ok {
 			confData.Values[k] = viper.GetStringSlice(k)
@@ -93,49 +74,4 @@ func loadConfig() *mux.ConfigData {
 	fmt.Println("end")
 	return confData
 
-	/*
-	   //	for i, v := range inputs {
-	   //		fmt.Println(i, v)
-	   		m := viper.GetStringMapString(v)
-	   		fmt.Println(m)
-	   		var baud int64 = 4800
-	   		baud, err := strconv.ParseInt(m["baud"], 10, 64)
-	   		if err != nil {
-	   			baud = 4800
-	   		}
-	   		outstr := v + "." + "output"
-	   		if m["type"] == "serial" {
-	   			fmt.Println("serial", baud, m["name"])
-	   		}
-	   		output := viper.GetStringSlice(outstr)
-	   		fmt.Println(output)
-
-	   		for i2, out := range output {
-	   			fmt.Println(i2, out)
-	   			if _, ok := channels[out]; !ok {
-	   				channels[out] = make(chan string, 10)
-	   			}
-	   		}
-	   		go serial(v, m["name"], baud, output, channels)
-
-	   	}
-
-	   	cont := true
-
-	   	for cont {
-	   		prompt := promptui.Select{
-	   			Label: "Select Action",
-	   			Items: []string{"Continue", "Exit", "Status"},
-	   		}
-
-	   		_, result, err := prompt.Run()
-
-	   		if err != nil {
-	   			fmt.Printf("Prompt failed %v\n", err)
-	   		}
-
-	   		fmt.Printf("You choose %q\n", result)
-	   	}
-	   	return inputs
-	*/
 }
