@@ -1,4 +1,4 @@
-module navmux
+module github.com/martinmarsh/navmux
 
 go 1.17
 

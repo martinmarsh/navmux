@@ -8,7 +8,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"navmux/mux"
+	"github.com/martinmarsh/navmux/mux"
 	"github.com/spf13/cobra"
 )
 

@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"fmt"
-	"navmux/mux"
+	"github.com/martinmarsh/navmux/mux"
 	"strings"
 
 	"github.com/spf13/viper"
