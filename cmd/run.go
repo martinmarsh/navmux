@@ -71,7 +71,7 @@ func loadConfig() *mux.ConfigData {
 	}
 
 	// Now process find types
-	fmt.Println("end")
+	fmt.Println("config loaded")
 	return confData
 
 }

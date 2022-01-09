@@ -7,13 +7,16 @@ package mux
 
 import (
 	"fmt"
-	"time"
+
 )
 
-func serial(config *ConfigData) {
-	fmt.Println("started navdata serial")
+func serial(name string, config *ConfigData, channels *map[string](chan string)) {
+	fmt.Println("started navdata serial " + name)
+	fmt.Println(config.Values[name + ".baud"])
+	
 }
 
+/*
 func serialreader(port string, name string, baud int64, output []string, channels map[string](chan string)) {
 	ever := true
 	str := ""
@@ -27,7 +30,7 @@ func serialreader(port string, name string, baud int64, output []string, channel
 		}
 	}
 }
-
+*/
 /*
 	   //	for i, v := range inputs {
 	   //		fmt.Println(i, v)
