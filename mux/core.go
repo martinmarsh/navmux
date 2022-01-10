@@ -34,10 +34,10 @@ func Execute(config *ConfigData) {
 	for processType, names := range config.TypeList {
 		fmt.Println(processType, names)
 		switch processType {
-		case "serial":
-			for _, name := range names {
-				serialProcess(name, config.Values[name], &channels)
-			}
+			case "serial":
+				for _, name := range names {
+					serialProcess(name, config.Values[name], &channels)
+				}
 		}
 	}
 	for{

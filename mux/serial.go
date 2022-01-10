@@ -26,6 +26,7 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 	if err != nil {
 		fmt.Println("no serial port " + portName)
 	}else{
+		fmt.Println("Open read serial port " + portName)
 		go serialReader(port, config["outputs"], channels)
 	}
 
@@ -37,6 +38,7 @@ func serialReader(port serial.Port, outputs []string, channels *map[string](chan
 	for{
 		for {
 			n, err := port.Read(buff)
+			fmt.Println("Data read")
 			if err != nil {
 				fmt.Println("Error on port")
 				break
