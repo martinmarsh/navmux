@@ -8,6 +8,7 @@ package mux
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"go.bug.st/serial"
 )
@@ -28,6 +29,7 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 	}else{
 		fmt.Println("Open read serial port " + portName)
 		go serialReader(port, config["outputs"], channels)
+		time.Sleep(time.Second)
 	}
 
 }
@@ -39,6 +41,7 @@ func serialReader(port serial.Port, outputs []string, channels *map[string](chan
 		for {
 			n, err := port.Read(buff)
 			fmt.Println("Data read")
+			time.Sleep(time.Second)
 			if err != nil {
 				fmt.Println("Error on port")
 				break

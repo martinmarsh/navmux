@@ -7,8 +7,9 @@ package cmd
 
 import (
 	"fmt"
+	"navmux/mux"
 	"os"
-	"github.com/martinmarsh/navmux/mux"
+
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +57,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of NavData",
 	Long:  `Version Number of NavData Boat General and Naviagation data processing`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("NavData Boat - General and Naviagation data processing - alpha v0.1")
+		fmt.Println("NavData Boat - General and Naviagation data processing -  v0.0.1-alpa")
 	},
 }
 
@@ -72,8 +73,8 @@ var runCmd = &cobra.Command{
 		} else {
 			fmt.Println("\nStarting Navdata\nruns until aborted")
 		}
-		
+
 		mux.Execute(loadConfig())
-		
+
 	},
 }
