@@ -7,6 +7,7 @@ package mux
 
 import (
 	"fmt"
+	"time"
 	"github.com/manifoldco/promptui"
 )
 
@@ -18,7 +19,7 @@ type ConfigData struct {
 
 func Execute(config *ConfigData) {
 	channels := make(map[string](chan string))
-	fmt.Println("started navdata execute")
+	fmt.Println("Navmux execute")
 	for name, param := range config.Index {
 		for _, value := range param {
 			if value == "outputs" {
@@ -53,5 +54,9 @@ func Execute(config *ConfigData) {
 		}
 
 		fmt.Printf("You choose %q\n", result)
+		time.Sleep(5 * time.Second)
+		if result == "Exit" {
+			break
+		}
 	}
 }
