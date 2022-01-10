@@ -7,22 +7,22 @@ package mux
 
 import (
 	"fmt"
+	"github.com/manifoldco/promptui"
 )
 
 type ConfigData struct {
-	Index map[string]([]string)
+	Index    map[string]([]string)
 	TypeList map[string]([]string)
-	Values map[string]([]string)
+	Values   map[string]map[string]([]string)
 }
 
-
-func Execute(config *ConfigData){
+func Execute(config *ConfigData) {
 	channels := make(map[string](chan string))
 	fmt.Println("started navdata execute")
 	for name, param := range config.Index {
 		for _, value := range param {
-			if value  == "outputs" {
-				for _, chanName := range config.Values[name + "." + value]{
+			if value == "outputs" {
+				for _, chanName := range config.Values[name][value] {
 					if _, ok := channels[chanName]; !ok {
 						channels[chanName] = make(chan string, 10)
 					}
@@ -34,13 +34,24 @@ func Execute(config *ConfigData){
 	for processType, names := range config.TypeList {
 		fmt.Println(processType, names)
 		switch processType {
-			case "serial":
-				for _, name := range names {
-				  serial(name, config, &channels)
-				}
-
-		} 
+		case "serial":
+			for _, name := range names {
+				serialProcess(name, config.Values[name], &channels)
+			}
+		}
 	}
+	for{
+		prompt := promptui.Select{
+			Label: "Select Action",
+			Items: []string{"Continue", "Exit", "Status"},
+		}
 
+		_, result, err := prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
+
+		fmt.Printf("You choose %q\n", result)
+	}
 }
-

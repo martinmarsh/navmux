@@ -36,24 +36,26 @@ func loadConfig() *mux.ConfigData {
 		}
 	}
 
-	//channels := make(map[string](chan string))
 
 	all := viper.AllKeys()
 
 	confData := &mux.ConfigData{
 		Index:    make(map[string]([]string)),
 		TypeList: make(map[string]([]string)),
-		Values:   make(map[string]([]string)),
+		Values:   make(map[string] map[string] ([]string)),
 	}
 
 	// Find keys in yaml assumes >2 deep collects map by 1st part of key
 	// also find names by device type every section has a type
 	for _, k := range all {
 		key := strings.SplitN(k, ".", 2)
-		if _, ok := confData.Values[k]; !ok {
-			confData.Values[k] = viper.GetStringSlice(k)
+		if _, ok := confData.Values[key[0]]; !ok {
+			confData.Values[key[0]] = make(map[string][]string)
 		}
-
+		if _, ok := confData.Values[key[0]][key[1]]; !ok {
+			confData.Values[key[0]][key[1]] = viper.GetStringSlice(k)
+		}
+		
 		if key[1] == "type" {
 			type_value := viper.GetString(k)
 			if _, ok := confData.TypeList[type_value]; !ok {

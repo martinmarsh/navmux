@@ -3,11 +3,15 @@ module github.com/martinmarsh/navmux
 go 1.17
 
 require (
+	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
+	go.bug.st/serial v1.3.4
 )
 
 require (
+	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/creack/goselect v0.1.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -19,6 +23,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
