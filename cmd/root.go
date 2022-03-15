@@ -16,7 +16,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "navdata",
+	Use:   "navmux",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -55,8 +55,8 @@ func init() {
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of NavData",
-	Long:  `Version Number of NavData Boat General and Naviagation data processing`,
+	Short: "Print the version number of navmux",
+	Long:  `Version Number of NavData Boat General and Navigation data processing`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("NavMux - Multiplexing data sources and data recording\nVersion: " + version.BuildVersion + "\nBuild: " + version.BuildTime)
 	},

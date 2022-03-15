@@ -8,6 +8,7 @@ package mux
 import (
 	"fmt"
 	"time"
+
 	"github.com/manifoldco/promptui"
 )
 
@@ -34,14 +35,17 @@ func Execute(config *ConfigData) {
 
 	for processType, names := range config.TypeList {
 		fmt.Println(processType, names)
-		switch processType {
+		for _, name := range names {
+			switch processType {
 			case "serial":
-				for _, name := range names {
-					serialProcess(name, config.Values[name], &channels)
-				}
+				serialProcess(name, config.Values[name], &channels)
+			case "udp_client":
+				udpClientProcess(name, config.Values[name], &channels)
+			}
 		}
 	}
-	for{
+
+	for {
 		prompt := promptui.Select{
 			Label: "Select Action",
 			Items: []string{"Continue", "Exit", "Status"},

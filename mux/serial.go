@@ -15,7 +15,7 @@ import (
 )
 
 func serialProcess(name string, config map[string][]string, channels *map[string](chan string)) {
-	fmt.Println("started navdata serial " + name)
+	fmt.Println("started navmux serial " + name)
 	baud, err := strconv.ParseInt(config["baud"][0], 10, 64)
 	if err != nil {
 		baud = 4800
@@ -70,10 +70,10 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 }
 
 func serialWriter(name string, port serial.Port, input []string, channels *map[string](chan string)) {
-	for{
+	for {
 		for _, in := range input {
-			str:=  <-(*channels)[in]
-			fmt.Println("Channel input to send via " + name + "Data: "+ str)
+			str := <-(*channels)[in]
+			fmt.Println("Channel input to send via " + name + "Data: " + str)
 
 			n, err := port.Write([]byte(str))
 			if err != nil {

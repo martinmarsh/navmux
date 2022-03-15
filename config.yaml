@@ -7,7 +7,7 @@ compass:
       - "to_log"
       - "to_helm"
       - "to_2000"
-      - "to_udp_server"
+      - "to_udp_client"
 
 bridge:
     name: "com5"
@@ -16,7 +16,7 @@ bridge:
     input: "to_2000"
     outputs:
       - "to_log"
-      - "to_udp_server"
+      - "to_udp_client"
       - "to_0183_gps"
 
 ais:
@@ -25,7 +25,7 @@ ais:
     baud: 38400
     outputs:
       - "to_2000"
-      - "to_udp_server"
+      - "to_udp_client"
 
 gps:
     name: "com6"
@@ -34,15 +34,17 @@ gps:
     input: to_0183_gps
     outputs:
       - "to_log"
-      - "to_udp_server"
+      - "to_udp_client"
 
 log:
     type: ships_log
     input: "to_log"
 
 udp:
-    type:  "udp_server"
-    input: "to_udp_server"
+    type:  "udp_client"
+    input: "to_udp_client"
+    server_ip: "127.0.0.1"
+    server_port: "8011"
 
 helm:
     type: auto-helm
