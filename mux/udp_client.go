@@ -12,14 +12,11 @@ import (
 
 func udpClientProcess(name string, config map[string][]string, channels *map[string](chan string)) {
 	fmt.Println("started navmux udp " + name)
-	server_port := config["server_port"][0]
-	server_ip := config["server_ip"][0]
+	server_addr := config["server_address"][0]
 	input_channel := config["input"][0]
-	fmt.Println(server_port, server_ip, input_channel)
+	fmt.Println(server_addr, input_channel)
 
-	service := server_ip + ":" + server_port
-
-	RemoteAddr, err := net.ResolveUDPAddr("udp", service)
+	RemoteAddr, _ := net.ResolveUDPAddr("udp", server_addr)
 
 	//LocalAddr := nil
 	// see https://golang.org/pkg/net/#DialUDP
@@ -29,23 +26,30 @@ func udpClientProcess(name string, config map[string][]string, channels *map[str
 	// note : you can use net.ResolveUDPAddr for LocalAddr as well
 	//        for this tutorial simplicity sake, we will just use nil
 
-	if err != nil {
-		fmt.Println("Could not open udp ")
-	}
-
-	fmt.Printf("Established connection to %s \n", service)
-	fmt.Printf("Remote UDP address : %s \n", conn.RemoteAddr().String())
-	fmt.Printf("Local UDP client address : %s \n", conn.LocalAddr().String())
-
-	defer conn.Close()
-
-	// write a message to server
-	message := []byte("$GPZDA,110910.59,15,09,2020,00,00*6F\n")
-
-	_, err = conn.Write(message)
+	//defer conn.Close()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Could not open udp server %s/n", name)
+	} else {
+		fmt.Printf("Established connection to %s \n", server_addr)
+		fmt.Printf("Remote UDP address : %s \n", conn.RemoteAddr().String())
+		fmt.Printf("Local UDP client address : %s \n", conn.LocalAddr().String())
+
+		go udpWriter(name, conn, input_channel, channels)
+
 	}
 
+}
+
+func udpWriter(name string, conn *net.UDPConn, input string, channels *map[string](chan string)) {
+	for {
+		str := <-(*channels)[input]
+		fmt.Println("Channel input to send via " + name + "Data: " + str)
+
+		n, err := conn.Write([]byte(str))
+		if err != nil {
+			fmt.Println("FATAL Error on UDP connection" + name)
+		}
+		fmt.Printf("Sent %v bytes\n", n)
+	}
 }
