@@ -7,6 +7,7 @@ package mux
 
 import (
 	"fmt"
+	"navmux/io"
 	
 )
 
@@ -20,7 +21,7 @@ func Execute(config *ConfigData) {
 	channels := make(map[string](chan string))
 	fmt.Println("Navmux execute")
 	channels["command"] = make(chan string, 2)
-	channels["to_beeper"] = make(chan string, 2)
+	
 	for name, param := range config.Index {
 		for _, value := range param {
 			if value == "outputs" {
@@ -33,7 +34,7 @@ func Execute(config *ConfigData) {
 		}
 	}
 
-	if err := initGPIO(); err != nil {
+	if err := io.Init(); err != nil {
 		fmt.Println("Failed to set up gpio")
 	}
 
@@ -56,9 +57,6 @@ func Execute(config *ConfigData) {
 		}
 	}
 
-	go beeperTask(&channels)
-
-
 	channels["to_udp_client"] <- "$GPZDA,110910.59,15,09,2020,00,00*6F"
 	
 	channels["to_udp_client"] <- "$HCHDM,172.5,M*28"
@@ -71,8 +69,8 @@ func Execute(config *ConfigData) {
 	channels["to_log"] <- "$GPAPB,A,A,5,L,N,V,V,359.,T,1,359.1,T,6,T,A*7C"
 	channels["to_log"] <- "$SSDPT,2.8,-0.7"
 
-	channels["to_beeper"] <- "1s"
-
+	io.Beep("1s")
+	
 	for {
 		command := <-(channels["command"])
 		fmt.Printf("Command '%s' received\n", command)
