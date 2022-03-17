@@ -70,13 +70,22 @@ func Execute(config *ConfigData) {
 	channels["to_log"] <- "$SSDPT,2.8,-0.7"
 
 	io.Beep("1s")
-	io.Helm('R',10,10)
 	
 	for {
 		command := <-(channels["command"])
 		fmt.Printf("Command '%s' received\n", command)
-
+		switch command {
+		case "0":
+			io.Helm('X',0.0)
+		case "1":
+			io.Helm('R',0.1)
+		case "2":
+			io.Helm('R',0.89)
+		case "3":
+			io.Helm('L',0.1)
+		case "4":
+			io.Helm('L',0.89)
+			
+		}
 	}
-
-
 }

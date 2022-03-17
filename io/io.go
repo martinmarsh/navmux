@@ -20,8 +20,7 @@ import (
 
 type helm_control struct {
     control byte
-    pulse  int
-	idle int
+    power  float32
 }
 
 var Beep_channel chan string
@@ -53,6 +52,11 @@ func Init() error {
 	beep_pin.Output()
 	left_pin.Output()
 	right_pin.Output()
+	power_pin.Output()
+
+	left_pin.Low()
+	right_pin.Low()
+	power_pin.Low()   
 
 	return nil
 }
@@ -61,30 +65,26 @@ func Beep(style string){
 	Beep_channel <- style
 }
 
-func Helm(control byte, on_period int, base_power int){
+func Helm(control byte, power_ratio float32){
 	// control = R L or X for Left Right or OFF
 	message :=  helm_control{
 		control: control,
-		pulse: on_period,
-		idle: base_power,
+		power: power_ratio,   	// <=1 1 = 100%
 	}
-	left_pin.Low()
-	right_pin.Low()
 	
-    power_pin.Mode(rpio.Pwm)
-	power_pin.Freq(64000)
-	power_pin.DutyCycle(0, 32)
-	//rpi.P1_18.Out(gpio.Low)
-	//rpi.P1_16.Out(gpio.Low)
-	//rpi.P1_12.Out(gpio.Low)
-
 	Motor_channel <- message
 }
 
 func helmTask(){
-	for {
-		motor := <- Motor_channel
-		switch motor.control {
+	const max_power = 1500    // 15ms cycle time  150us min
+	const max_loops = 34	 // 34 x 15 = 510 ms read channel period
+	t1 := time.Duration(0)
+	t2 := time.Duration(max_power) * time.Microsecond
+		
+	for {	
+		select {
+		case motor := <- Motor_channel:
+			switch motor.control {
 			case 'L':
 				right_pin.Low()
 				left_pin.High()
@@ -101,19 +101,34 @@ func helmTask(){
 				right_pin.Low()
 				//rpi.P1_18.Out(gpio.Low)
 				//rpi.P1_16.Out(gpio.Low)
+			}
+			if motor.power > 0.9{
+				motor.power = 1.0
+			} else if motor.power < 0.1 {
+				motor.power = 0
+			}
+			p1 := int(max_power * motor.power)
+			t1 = time.Duration(p1) * time.Microsecond
+			t2 = time.Duration(max_power - p1) * time.Microsecond	
+		default:
+			// continue 
 		}
-		t := time.NewTicker(2 * time.Second)
-		for i := 0; i > 10; i++{
+
+		// 15ms loop
+		for i := 0; i < max_loops; i++ {
 			//rpi.P1_12.PWM(gpio.DutyMax/1, 1000)
-			power_pin.DutyCycle(1, 32)
-			<-t.C
+			if t1 > 0 {
+				power_pin.High()
+				time.Sleep(t1)
+			}
 			//rpi.P1_12.PWM(gpio.DutyMax/9, 1000)
-			power_pin.DutyCycle(30, 32)
-			<-t.C
+			if t2 > 0 {
+				power_pin.Low()
+				time.Sleep(t2)
+			}
 		}
 
 	}
-
 }
 
 func beeperTask(){
@@ -131,6 +146,7 @@ func beeperTask(){
 			for l := 0; l < count; l++  {
 				t := time.NewTicker(time.Duration(length) * time.Millisecond)
 				//rpi.P1_22.Out(gpio.High)
+
 				beep_pin.High() 
 				<-t.C
 				//rpi.P1_22.Out(gpio.Low)
