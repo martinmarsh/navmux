@@ -1,0 +1,60 @@
+
+# note "command" channel is a reserved channel for keyboard commands
+# so should not be used in inputs or outputs
+compass:
+    name: /dev/ttuUSB0
+    type: serial
+    baud:  4500
+    outputs:
+      - to_log
+      - to_helm
+      - to_2000
+      - to_udp_client
+
+bridge:
+    name: /dev/ttyUSB1
+    type: serial
+    baud: 38400
+    input: to_2000
+    outputs:
+      - to_log
+      - to_udp_client
+      - to_0183_gps
+
+ais:
+    name: /dev/ttyUSB3
+    type: serial
+    baud: 38400
+    outputs:
+      - to_2000
+      - to_udp_client
+
+gps:
+    name: /dev/ttyUSB2
+    type: serial
+    baud: 9600
+    input: to_0183_gps
+    outputs:
+      - to_log
+      - to_udp_client
+
+log:
+    type: ships_log
+    input: to_log
+
+udp:
+    type:  udp_client
+    input: to_udp_client
+    server_address: 192.168.1.14:8011
+
+helm:
+    type: auto-helm
+    input: to_helm
+
+
+keys:
+    type: keyboard
+    outputs: 
+        - to_helm
+
+

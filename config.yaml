@@ -1,8 +1,10 @@
 
-# note "command" channel is a reserved channel for keyboard commands
-# so should not be used in inputs or outputs
+# Reserved channels:
+# command       used for keyboard commands
+# to_beeper     used for signalling a beep with key words number follwed by short or long eg 1s, 2l
+# so these channels should not be used in inputs or outputs below
 compass:
-    name: com4
+    name: /dev/ttuUSB0
     type: serial
     baud:  4500
     outputs:
@@ -12,7 +14,7 @@ compass:
       - to_udp_client
 
 bridge:
-    name: com5
+    name: /dev/ttyUSB1
     type: serial
     baud: 38400
     input: to_2000
@@ -22,7 +24,7 @@ bridge:
       - to_0183_gps
 
 ais:
-    name: com7
+    name: /dev/ttyUSB3
     type: serial
     baud: 38400
     outputs:
@@ -30,7 +32,7 @@ ais:
       - to_udp_client
 
 gps:
-    name: com6
+    name: /dev/ttyUSB2
     type: serial
     baud: 9600
     input: to_0183_gps
@@ -45,12 +47,11 @@ log:
 udp:
     type:  udp_client
     input: to_udp_client
-    server_address: 127.0.0.1:8011
+    server_address: 192.168.1.14:8011
 
 helm:
     type: auto-helm
     input: to_helm
-
 
 keys:
     type: keyboard
