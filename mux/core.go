@@ -70,6 +70,7 @@ func Execute(config *ConfigData) {
 	channels["to_log"] <- "$SSDPT,2.8,-0.7"
 
 	io.Beep("1s")
+	io.Helm('R',10,10)
 	
 	for {
 		command := <-(channels["command"])
