@@ -31,12 +31,11 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 		if len(config["outputs"]) > 0 {
 			fmt.Println("Open read serial port " + portName)
 			go serialReader(name, port, config["outputs"], channels)
-			time.Sleep(time.Second)
+			
 		}
 		if len(config["input"]) > 0 {
 			fmt.Println("Open write serial port " + portName)
 			go serialWriter(name, port, config["input"], channels)
-			time.Sleep(time.Second)
 		}
 
 	}
@@ -45,10 +44,10 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 
 func serialReader(name string, port serial.Port, outputs []string, channels *map[string](chan string)) {
 	buff := make([]byte, 100)
-
+	time.Sleep(3 * time.Second)
 	for {
 		n, err := port.Read(buff)
-		fmt.Println("Data read")
+		
 		if err != nil {
 			fmt.Println("FATAL Error on port " + name)
 			time.Sleep(time.Minute)
@@ -57,7 +56,7 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 			fmt.Println("\nEOF on read of " + name)
 			time.Sleep(time.Minute)
 		}
-		fmt.Printf("%v", string(buff[:n]))
+		
 		// If we receive a newline send to output channels
 		if strings.Contains(string(buff[:n]), "\n") {
 			str := string(buff[:n])
@@ -70,18 +69,16 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 }
 
 func serialWriter(name string, port serial.Port, input []string, channels *map[string](chan string)) {
+	time.Sleep(2 * time.Second)
 	for {
 		for _, in := range input {
 			str := <-(*channels)[in]
-			fmt.Println("Channel input to send via " + name + "Data: " + str)
-
-			n, err := port.Write([]byte(str))
+			_, err := port.Write([]byte(str))
 			if err != nil {
 				fmt.Println("FATAL Error on port" + name)
 				time.Sleep(time.Minute)
 			}
-			fmt.Printf("Sent %v bytes\n", n)
-
+			
 		}
 	}
 

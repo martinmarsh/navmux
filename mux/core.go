@@ -33,8 +33,9 @@ func Execute(config *ConfigData) {
 		}
 	}
 
-	if err := io.Init(); err != nil {
+	 if err := io.Init(); err != nil {
 		fmt.Println("Failed to set up gpio")
+		panic("error GPIO")
 	}
 
 	for processType, names := range config.TypeList {

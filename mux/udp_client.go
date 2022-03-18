@@ -44,12 +44,10 @@ func udpClientProcess(name string, config map[string][]string, channels *map[str
 func udpWriter(name string, conn *net.UDPConn, input string, channels *map[string](chan string)) {
 	for {
 		str := <-(*channels)[input]
-		fmt.Println("Channel input to send via " + name + "Data: " + str)
-
-		n, err := conn.Write([]byte(str))
+		_, err := conn.Write([]byte(str))
 		if err != nil {
 			fmt.Println("FATAL Error on UDP connection" + name)
 		}
-		fmt.Printf("Sent %v bytes\n", n)
+		
 	}
 }

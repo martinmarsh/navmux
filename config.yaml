@@ -20,7 +20,7 @@ bridge:
     outputs:
       - to_log
       - to_udp_client
-      - to_0183_gps
+
 
 ais:
     name: /dev/ttyUSB3
