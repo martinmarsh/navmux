@@ -1,7 +1,6 @@
 
 # Reserved channels:
 # command       used for keyboard commands
-# to_beeper     used for signalling a beep with key words number follwed by short or long eg 1s, 2l
 # so these channels should not be used in inputs or outputs below
 compass:
     name: /dev/ttuUSB0
@@ -29,15 +28,6 @@ ais:
     baud: 38400
     outputs:
       - to_2000
-      - to_udp_client
-
-gps:
-    name: /dev/ttyUSB2
-    type: serial
-    baud: 9600
-    input: to_0183_gps
-    outputs:
-      - to_log
       - to_udp_client
 
 log:

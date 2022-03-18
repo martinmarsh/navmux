@@ -88,6 +88,7 @@ func helmTask(){
 	for {	
 		select {
 		case motor := <- Motor_channel:
+			fmt.Println("motor control")
 			switch motor.control {
 			case 'L':
 				right_pin.Low()
@@ -125,7 +126,8 @@ func helmTask(){
 			t2 = time.Duration(mp - p1) * time.Microsecond
 			fmt.Printf("%d %d\n", t1, t2)	
 		default:
-			// continue 
+			// continue
+			
 		}
 
 		// 3ms loop
