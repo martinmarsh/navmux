@@ -78,13 +78,19 @@ func Execute(config *ConfigData) {
 		case "0":
 			io.Helm('X',0.0)
 		case "1":
-			io.Helm('R',0.1)
+			io.Helm('R',0.06)
 		case "2":
-			io.Helm('R',0.89)
+			io.Helm('R',0.94)
 		case "3":
 			io.Helm('L',0.1)
 		case "4":
 			io.Helm('L',0.89)
+		case "5":
+			io.Helm('L',0)
+		case "6":
+			io.Helm('L',1.0)
+		case "7":
+			io.Helm('L',0.5)		
 			
 		}
 	}

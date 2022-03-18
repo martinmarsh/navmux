@@ -28,26 +28,26 @@ func shipsLogProcess(name string, config map[string][]string, channels *map[stri
 
 func fileLogger(name string, writer *bufio.Writer, input string, channels *map[string](chan string)){
 	for {
-		
+		const every = 25
 		str := <-(*channels)[input]
+		count := every
 		if str[0] == '$'{
-			nmea.Handle.Parse(str)
-		}
+	        count--
+			if count == 0 {
+				count = every
+				nmea.Handle.Parse(str)
+				data_map := nmea.Handle.GetMap()
+				data_json, _ := json.Marshal(data_map)
+				
+				rec_str := fmt.Sprintf("%s\n", string(data_json))
+				fmt.Println(rec_str)
 
-		
-		data_map := nmea.Handle.GetMap()
-		data_json, _ := json.Marshal(data_map)
-		
-		rec_str := fmt.Sprintf("%s\n", string(data_json))
-    	fmt.Println(rec_str)
-
-		_, err := writer.WriteString(rec_str)
-		if err != nil {
-			fmt.Println("FATAL Error on write" + name)
-		}
-		writer.Flush()
-		
-		
+				_, err := writer.WriteString(rec_str)
+				if err != nil {
+					fmt.Println("FATAL Error on write" + name)
+				}
+				writer.Flush()
+			}
+		}	
 	}
-
 }

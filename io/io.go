@@ -76,10 +76,14 @@ func Helm(control byte, power_ratio float32){
 }
 
 func helmTask(){
-	const max_power = 1500    // 15ms cycle time  150us min
-	const max_loops = 34	 // 34 x 15 = 510 ms read channel period
+	const max_power = 3000    // 3ms cycle time  300us min
+	const max_loops = 170	 // 170 x 3  510 ms read channel period
+	const max_power_slow = 20000    // 20ms cycle time  3ms min
+	const max_loops_slow = 25	 // 25 x 20  500 ms read channel period
 	t1 := time.Duration(0)
-	t2 := time.Duration(max_power) * time.Microsecond
+	t2 := time.Duration(max_power_slow) * time.Microsecond
+	mp := max_power_slow
+	ml := max_loops_slow
 		
 	for {	
 		select {
@@ -102,20 +106,31 @@ func helmTask(){
 				//rpi.P1_18.Out(gpio.Low)
 				//rpi.P1_16.Out(gpio.Low)
 			}
-			if motor.power > 0.9{
-				motor.power = 1.0
-			} else if motor.power < 0.1 {
-				motor.power = 0
+			p1 := 0
+			mp = max_power_slow
+			ml = max_loops_slow
+
+			if motor.power > 0.2 && motor.power < 0.8 {	
+				mp = max_power
+				ml = max_loops
 			}
-			p1 := int(max_power * motor.power)
+		    if motor.power > 0.95 {
+				p1 = mp
+			} else if motor.power < 0.02{
+				p1 = 0
+			} else {
+				p1 = int(float32(mp) * motor.power)
+			}
 			t1 = time.Duration(p1) * time.Microsecond
-			t2 = time.Duration(max_power - p1) * time.Microsecond	
+			t2 = time.Duration(mp - p1) * time.Microsecond
+			fmt.Printf("%d %d\n", t1, t2)	
 		default:
 			// continue 
 		}
 
-		// 15ms loop
-		for i := 0; i < max_loops; i++ {
+		// 3ms loop
+		
+		for i := 0; i < ml; i++ {
 			//rpi.P1_12.PWM(gpio.DutyMax/1, 1000)
 			if t1 > 0 {
 				power_pin.High()
