@@ -26,7 +26,7 @@ func Execute(config *ConfigData) {
 			if value == "outputs" {
 				for _, chanName := range config.Values[name][value] {
 					if _, ok := channels[chanName]; !ok {
-						channels[chanName] = make(chan string, 10)
+						channels[chanName] = make(chan string, 30)
 					}
 				}
 			}
