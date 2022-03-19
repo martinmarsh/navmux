@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"navmux/io"
 	"os"
+	"time"
 	"github.com/stianeikeland/go-rpio/v4"
 
 )
@@ -20,6 +21,9 @@ type ConfigData struct {
 }
 
 func Execute(config *ConfigData) {
+	// wait for everything to connect on boot up
+	time.Sleep(5 * time.Second)
+	
 	channels := make(map[string](chan string))
 	fmt.Println("Navmux execute")
 	channels["command"] = make(chan string, 2)
