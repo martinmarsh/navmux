@@ -8,6 +8,9 @@ package mux
 import (
 	"fmt"
 	"navmux/io"
+	"os"
+	"github.com/stianeikeland/go-rpio/v4"
+
 )
 
 type ConfigData struct {
@@ -32,6 +35,13 @@ func Execute(config *ConfigData) {
 			}
 		}
 	}
+
+	if err := rpio.Open(); err != nil {
+		fmt.Println("RPIO - could not be openned")
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer rpio.Close()
 
 	 if err := io.Init(); err != nil {
 		fmt.Println("Failed to set up gpio")

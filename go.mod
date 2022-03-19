@@ -6,6 +6,7 @@ require (
 	github.com/martinmarsh/nmea0183 v0.1.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
+	github.com/stianeikeland/go-rpio/v4 v4.6.0
 	go.bug.st/serial v1.3.4
 )
 
@@ -21,12 +22,9 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stianeikeland/go-rpio/v4 v4.6.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	periph.io/x/conn/v3 v3.6.10 // indirect
-	periph.io/x/periph v3.6.8+incompatible // indirect
 )

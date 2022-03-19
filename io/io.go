@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"time"
 	"strconv"
-	"os"
 	"github.com/stianeikeland/go-rpio/v4"
 
 	//"periph.io/x/periph/conn/gpio"
@@ -44,10 +43,11 @@ func Init() error {
 	//if _, err := host.Init(); err != nil {
 	//	return err
 	//}
-	if err := rpio.Open(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	//if err := rpio.Open(); err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
+	//defer rpio.Close()
 
 	beep_pin.Output()
 	left_pin.Output()
@@ -130,18 +130,22 @@ func helmTask(){
 			
 		}
 
-		// 3ms loop
-		
-		for i := 0; i < ml; i++ {
-			//rpi.P1_12.PWM(gpio.DutyMax/1, 1000)
-			if t1 > 0 {
-				power_pin.High()
-				time.Sleep(t1)
-			}
-			//rpi.P1_12.PWM(gpio.DutyMax/9, 1000)
-			if t2 > 0 {
-				power_pin.Low()
-				time.Sleep(t2)
+		if t1 == 0 {
+			power_pin.Low()
+			time.Sleep(500 * time.Millisecond)
+		} else if t2 == 0 {
+			power_pin.High()
+			time.Sleep(500 * time.Millisecond)
+		} else {
+			for i := 0; i < ml; i++ {
+				if t1 > 0 {
+					power_pin.High()
+					time.Sleep(t1)
+				}
+				if t2 > 0 {
+					power_pin.Low()
+					time.Sleep(t2)
+				}
 			}
 		}
 

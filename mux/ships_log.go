@@ -27,7 +27,7 @@ func shipsLogProcess(name string, config map[string][]string, channels *map[stri
 
 
 func fileLogger(name string, writer *bufio.Writer, input string, channels *map[string](chan string)){
-	const every = 10
+	const every = 100
 	count := every
 	for {
 		str := <-(*channels)[input]

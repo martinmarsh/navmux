@@ -28,12 +28,14 @@ func Make(size int, ret_size int) *circ_buf{
 	return &p
 }
 
+
+
 func (cb *circ_buf) Write_byte(b byte) {
-	cb.buffer[cb.write_pos] = b
-	cb.write_pos++
 	if cb.write_pos >= cb.end {
 		cb.write_pos = 0
 	}
+	cb.buffer[cb.write_pos] = b
+	cb.write_pos++
 	cb.count++
 	if b == 13 {
 		cb.cr_count++
@@ -42,16 +44,16 @@ func (cb *circ_buf) Write_byte(b byte) {
 
 func (cb *circ_buf) ReadString() string {
 	if cb.cr_count > 0 {
-		for i:=0; i < cb.count; i++ {
+		i := 0
+		for{	
 			b, _ := cb.Read_byte()
 			if b != 13 {
-				cb.ret_buffer[i] = b
+				cb.ret_buffer[i] = b	
 			} else {
-				cb.cr_count--
 				return string(cb.ret_buffer[:i])
-			} 
+			}
+			i++
 		}
-		return ""
 
 	} else {
 		return ""
@@ -69,6 +71,9 @@ func (cb *circ_buf) Read_byte() (byte, error) {
 	b := cb.buffer[cb.read_pos] 
 	cb.read_pos++
 	cb.count--
+	if b == 13 {
+		cb.cr_count--
+	}
 	return b, nil
 }
 

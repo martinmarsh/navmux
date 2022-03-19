@@ -10,7 +10,6 @@ import (
 	"navmux/buffer"
 	"strconv"
 	"time"
-
 	"go.bug.st/serial"
 )
 
@@ -43,20 +42,19 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 }
 
 func serialReader(name string, port serial.Port, outputs []string, channels *map[string](chan string)) {
-	buff := make([]byte, 1000)
-	cb := buffer.Make(5000, 100)
-	time.Sleep(1 * time.Second)
+	buff := make([]byte, 50)
+	cb := buffer.Make(300, 100)
+	time.Sleep(100 * time.Millisecond)
 	for {
 		n, err := port.Read(buff)
 		if err != nil {
 			fmt.Println("FATAL Error on port " + name)
-			time.Sleep(time.Minute)
+			time.Sleep(5 * time.Second)
 		}
 		if n == 0 {
 			fmt.Println("\nEOF on read of " + name)
-			time.Sleep(time.Minute)
+			time.Sleep(5 * time.Second)
 		} else {
-			fmt.Printf("read %d : %s\n\n", n, buff[:n])
 			for i := 0; i < n; i++ {
 				if buff[i] != 10 {
 					cb.Write_byte(buff[i])
@@ -68,8 +66,7 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 			if len(str) == 0 {
 				break
 			}
-			str += "\r\n"
-			fmt.Printf("Sending from serial '%s'\n", str)
+			// fmt.Printf("\n\nSending from serial '%s'\n", str)
 			for _, out := range outputs {
 				(*channels)[out] <- str
 			}
@@ -79,7 +76,7 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 }
 
 func serialWriter(name string, port serial.Port, input []string, channels *map[string](chan string)) {
-	time.Sleep(1 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 	for {
 		for _, in := range input {
 			str := <-(*channels)[in]
