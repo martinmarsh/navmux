@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type circ_buf struct {
+type circular_byte_buffer struct {
 	end int
 	buffer []byte
 	ret_buffer []byte
@@ -15,8 +15,8 @@ type circ_buf struct {
 }
 
 
-func Make(size int, ret_size int) *circ_buf{
-	p := circ_buf {
+func MakeByteBuffer(size int, ret_size int) *circular_byte_buffer{
+	p := circular_byte_buffer {
 		end: size -1,
 		buffer: make([]byte, size),
 		ret_buffer: make([]byte, ret_size),
@@ -30,7 +30,7 @@ func Make(size int, ret_size int) *circ_buf{
 
 
 
-func (cb *circ_buf) Write_byte(b byte) {
+func (cb *circular_byte_buffer) Write_byte(b byte) {
 	if cb.write_pos >= cb.end {
 		cb.write_pos = 0
 	}
@@ -42,7 +42,7 @@ func (cb *circ_buf) Write_byte(b byte) {
 	}
 }
 
-func (cb *circ_buf) ReadString() string {
+func (cb *circular_byte_buffer) ReadString() string {
 	if cb.cr_count > 0 {
 		i := 0
 		for{	
@@ -61,7 +61,7 @@ func (cb *circ_buf) ReadString() string {
 
 }
 
-func (cb *circ_buf) Read_byte() (byte, error) {
+func (cb *circular_byte_buffer) Read_byte() (byte, error) {
 	if cb.count == 0 {
 		return 0, fmt.Errorf("Empty")
 	}
@@ -77,3 +77,42 @@ func (cb *circ_buf) Read_byte() (byte, error) {
 	return b, nil
 }
 
+
+type circular_float_buffer struct {
+	end int
+	buffer [] float32
+	read_pos int
+	write_pos int
+	count int
+}
+
+
+func MakeFloatBuffer(size int) *circular_float_buffer{
+	p := circular_float_buffer {
+		end: size -1,
+		buffer: make([]float32, size),
+		read_pos: 0,
+		write_pos: 0,
+		count: 0,
+	}
+	return &p
+}
+
+func (cb *circular_float_buffer) Write(fv float32) {
+	if cb.write_pos >= cb.end {
+		cb.write_pos = 0
+	}
+	cb.buffer[cb.write_pos] = fv
+	cb.write_pos++
+	cb.count++
+}
+
+func (cb *circular_float_buffer) Read() float32 {
+	if cb.read_pos >= cb.end {
+		cb.read_pos = 0
+	}
+	fv := cb.buffer[cb.read_pos] 
+	cb.read_pos++
+	cb.count--
+	return fv
+}
