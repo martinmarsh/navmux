@@ -5,7 +5,7 @@
 compass:
     name: /dev/ttuUSB0
     type: serial
-    baud:  4500
+    baud:  4800
     outputs:
       - to_log
       - to_helm
