@@ -65,11 +65,11 @@ func Beep(style string){
 	Beep_channel <- style
 }
 
-func Helm(control byte, power_ratio float32){
+func Helm(control byte, power_ratio float64){
 	// control = R L or X for Left Right or OFF
 	message :=  helm_control{
 		control: control,
-		power: power_ratio,   	// <=1 1 = 100%
+		power: float32(power_ratio),   	// <=1 1 = 100%
 	}
 	
 	Motor_channel <- message

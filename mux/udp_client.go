@@ -25,12 +25,15 @@ func udpWriter(name string, server_addr string, input string, channels *map[stri
 	connection := false
 	for{
 		RemoteAddr, _ := net.ResolveUDPAddr("udp", server_addr)
-
 		conn, err := net.DialUDP("udp", nil, RemoteAddr)
 		
 		if err != nil {
 			fmt.Printf("Could not open udp server %s\n", name)
-			time.Sleep(5 * time.Second)
+			//ensure channel is cleared then retry
+			connection = false
+			for i :=0 ; i > 100; i++ {
+				<-(*channels)[input]
+			}
 		} else {
 			defer conn.Close()
 			fmt.Printf("Established connection to %s \n", server_addr)

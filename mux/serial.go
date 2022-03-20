@@ -43,7 +43,7 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 
 func serialReader(name string, port serial.Port, outputs []string, channels *map[string](chan string)) {
 	buff := make([]byte, 50)
-	cb := buffer.Make(300, 100)
+	cb := buffer.MakeByteBuffer(300, 100)
 	time.Sleep(100 * time.Millisecond)
 	for {
 		n, err := port.Read(buff)
