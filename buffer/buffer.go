@@ -83,7 +83,7 @@ type circular_float_buffer struct {
 	buffer [] float32
 	read_pos int
 	write_pos int
-	count int
+	Count int
 }
 
 
@@ -93,7 +93,7 @@ func MakeFloatBuffer(size int) *circular_float_buffer{
 		buffer: make([]float32, size),
 		read_pos: 0,
 		write_pos: 0,
-		count: 0,
+		Count: 0,
 	}
 	return &p
 }
@@ -104,7 +104,7 @@ func (cb *circular_float_buffer) Write(fv float32) {
 	}
 	cb.buffer[cb.write_pos] = fv
 	cb.write_pos++
-	cb.count++
+	cb.Count++
 }
 
 func (cb *circular_float_buffer) Read() float32 {
@@ -113,6 +113,6 @@ func (cb *circular_float_buffer) Read() float32 {
 	}
 	fv := cb.buffer[cb.read_pos] 
 	cb.read_pos++
-	cb.count--
+	cb.Count--
 	return fv
 }
