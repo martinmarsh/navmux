@@ -8,7 +8,7 @@ package mux
 import (
 	"fmt"
 	"net"
-	"time"
+
 )
 
 func udpClientProcess(name string, config map[string][]string, channels *map[string](chan string)) {

@@ -12,6 +12,7 @@ type circular_byte_buffer struct {
 	write_pos int
 	count int
 	cr_count int
+	ret_size int
 }
 
 
@@ -24,6 +25,7 @@ func MakeByteBuffer(size int, ret_size int) *circular_byte_buffer{
 		write_pos: 0,
 		count: 0,
 		cr_count: 0,
+		ret_size: ret_size,
 	}
 	return &p
 }
@@ -53,6 +55,10 @@ func (cb *circular_byte_buffer) ReadString() string {
 				return string(cb.ret_buffer[:i])
 			}
 			i++
+			if i >= cb.ret_size{
+				fmt.Println("No CR in string corrupt o/p = %s\n", string(cb.ret_buffer[:i]) )
+				return string(cb.ret_buffer[:i])
+			}
 		}
 
 	} else {

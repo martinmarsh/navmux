@@ -37,6 +37,13 @@ func Execute(config *ConfigData) {
 					}
 				}
 			}
+			if value == "input" {
+				for _, chanName := range config.Values[name][value] {
+					if _, ok := channels[chanName]; !ok {
+						channels[chanName] = make(chan string, 30)
+					}
+				}
+			}
 		}
 	}
 

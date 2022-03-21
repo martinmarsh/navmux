@@ -32,7 +32,7 @@ func fileLogger(name string, writer *bufio.Writer, input string, channels *map[s
 	for {
 		str := <-(*channels)[input]
 		// fmt.Printf("Recieved log %s\n", str)
-		if str[0] == '$'{
+		if len(str)>5 && len(str)<89 && str[0] == '$'{
 			// fmt.Printf("counter is %d\n", count)
 	        count -= 1
 			nmea.Handle.Parse(str)

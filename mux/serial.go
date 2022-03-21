@@ -8,8 +8,8 @@ package mux
 import (
 	"fmt"
 	"navmux/buffer"
-	"strconv"
 	"time"
+	"strconv"
 	"go.bug.st/serial"
 )
 
@@ -42,8 +42,8 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 }
 
 func serialReader(name string, port serial.Port, outputs []string, channels *map[string](chan string)) {
-	buff := make([]byte, 50)
-	cb := buffer.MakeByteBuffer(300, 100)
+	buff := make([]byte, 25)
+	cb := buffer.MakeByteBuffer(400, 92)
 	time.Sleep(100 * time.Millisecond)
 	for {
 		n, err := port.Read(buff)
@@ -66,7 +66,6 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 			if len(str) == 0 {
 				break
 			}
-			// fmt.Printf("\n\nSending from serial '%s'\n", str)
 			for _, out := range outputs {
 				(*channels)[out] <- str
 			}

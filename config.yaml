@@ -3,7 +3,7 @@
 # command       used for keyboard commands
 # so these channels should not be used in inputs or outputs below
 compass:
-    name: /dev/ttuUSB0
+    name: /dev/ttyUSB0
     type: serial
     baud:  4800
     outputs:

@@ -71,7 +71,7 @@ func Helm(control byte, power_ratio float64){
 		control: control,
 		power: float32(power_ratio),   	// <=1 1 = 100%
 	}
-	
+	fmt.Println(message)
 	Motor_channel <- message
 }
 
@@ -124,7 +124,7 @@ func helmTask(){
 			}
 			t1 = time.Duration(p1) * time.Microsecond
 			t2 = time.Duration(mp - p1) * time.Microsecond
-			fmt.Printf("%d %d\n", t1, t2)	
+			//fmt.Printf("%d %d\n", t1, t2)	
 		default:
 			// continue
 			
