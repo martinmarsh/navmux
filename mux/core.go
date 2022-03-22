@@ -10,7 +10,7 @@ import (
 	"navmux/io"
 	"os"
 	"time"
-	"os/exec"
+	"syscall"
 
 	"github.com/stianeikeland/go-rpio/v4"
 )
@@ -87,8 +87,22 @@ func Execute(config *ConfigData) {
 		fmt.Printf("Command '%s' received\n", command)
 		switch command {
 		case "99":
-			exec.Command("sudo shutdown -h now")
+			io.Beep("2l")
+			Exit()
+			
 				
 		}
 	}
+}
+
+
+func Exit() {
+	var err error
+	err = syscall.Reboot(syscall.LINUX_REBOOT_CMD_POWER_OFF)
+	if err != nil {
+		fmt.Printf("power off failed: %v", err)
+	}
+	
+	os.Exit(1)
+	select {}
 }
