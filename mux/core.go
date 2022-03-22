@@ -10,8 +10,9 @@ import (
 	"navmux/io"
 	"os"
 	"time"
-	"github.com/stianeikeland/go-rpio/v4"
+	"os/exec"
 
+	"github.com/stianeikeland/go-rpio/v4"
 )
 
 type ConfigData struct {
@@ -54,7 +55,7 @@ func Execute(config *ConfigData) {
 	}
 	defer rpio.Close()
 
-	 if err := io.Init(); err != nil {
+	 if err := io.Init(&channels); err != nil {
 		fmt.Println("Failed to set up gpio")
 		panic("error GPIO")
 	}
@@ -85,35 +86,9 @@ func Execute(config *ConfigData) {
 		command := <-(channels["command"])
 		fmt.Printf("Command '%s' received\n", command)
 		switch command {
-		case "0":
-			io.Helm('X',0.0)
-		case "1":
-			io.Helm('R',0.06)
-		case "2":
-			io.Helm('R',0.94)
-		case "3":
-			io.Helm('L',0.1)
-		case "4":
-			io.Helm('L',0.89)
-		case "5":
-			io.Helm('L',0)
-		case "6":
-			io.Helm('L',1.0)
-		case "7":
-			io.Helm('L',0.5)
-		case "8":
-			channels["to_udp_client"] <- "$GPZDA,110910.59,15,09,2020,00,00*6F"
-			channels["to_udp_client"] <- "$HCHDM,172.5,M*28"
-			channels["to_udp_client"] <- "$GPRMC,110910.59,A,5047.3986,N,00054.6007,W,0.08,0.19,150920,0.24,W,D,V*75"
-			channels["to_udp_client"] <- "$GPAPB,A,A,5,L,N,V,V,359.,T,1,359.1,T,6,T,A*7C"
-		
-			channels["to_log"] <- "$GPZDA,110910.59,15,09,2020,00,00*6F"
-			channels["to_log"] <- "$HCHDM,172.5,M*28"
-			channels["to_log"] <- "$GPAPB,A,A,5,L,N,V,V,359.,T,1,359.1,T,6,T,A*7C"
-			channels["to_log"] <- "$GPRMC,110910.59,A,5047.3986,N,00054.6007,W,0.08,0.19,150920,0.24,W,D,V*75"
-		
-		
-			
+		case "99":
+			exec.Command("sudo shutdown -h now")
+				
 		}
 	}
 }

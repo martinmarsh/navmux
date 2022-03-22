@@ -41,6 +41,10 @@ udp:
 
 helm:
     type: auto-helm
+    p_factor: 100
+    i_factor: 5
+    d_factor: 25
+    gain_factor: 100
     input: to_helm
 
 keys:

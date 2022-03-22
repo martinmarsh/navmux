@@ -31,12 +31,12 @@ var right_pin = rpio.Pin(23)
 var power_pin = rpio.Pin(18)
 
 
-func Init() error {
+func Init(channels *map[string](chan string)) error {
 	Beep_channel = make(chan string, 4)
 	Motor_channel = make(chan helm_control, 3)
 
 	go beeperTask()
-	go helmTask()
+	go helmTask(channels)
 
 	//fmt.Println("Loading periph.io drivers")
 	// Load periph.io drivers:
@@ -75,7 +75,7 @@ func Helm(control byte, power_ratio float64){
 	Motor_channel <- message
 }
 
-func helmTask(){
+func helmTask(channels *map[string](chan string)){
 	const max_power = 3000    // 3ms cycle time  300us min
 	const max_loops = 170	 // 170 x 3  510 ms read channel period
 	const max_power_slow = 20000    // 20ms cycle time  3ms min
@@ -86,6 +86,9 @@ func helmTask(){
 	ml := max_loops_slow
 		
 	for {	
+		//ask helm to compute another value
+		(*channels)["to_helm"] <-"compute"
+
 		select {
 		case motor := <- Motor_channel:
 			fmt.Println("motor control")
@@ -127,7 +130,6 @@ func helmTask(){
 			//fmt.Printf("%d %d\n", t1, t2)	
 		default:
 			// continue
-			
 		}
 
 		if t1 == 0 {
