@@ -77,9 +77,9 @@ func Helm(control byte, power_ratio float64){
 
 func helmTask(channels *map[string](chan string)){
 	const max_power = 3000    // 3ms cycle time  300us min
-	const max_loops = 170	 // 170 x 3  510 ms read channel period
+	const max_loops = 85	 // 85 x 3  255 ms read channel period
 	const max_power_slow = 20000    // 20ms cycle time  3ms min
-	const max_loops_slow = 25	 // 25 x 20  500 ms read channel period
+	const max_loops_slow = 14	 // 14 x 20  280 ms read channel period
 	t1 := time.Duration(0)
 	t2 := time.Duration(max_power_slow) * time.Microsecond
 	mp := max_power_slow
@@ -134,10 +134,10 @@ func helmTask(channels *map[string](chan string)){
 
 		if t1 == 0 {
 			power_pin.Low()
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(250 * time.Millisecond)
 		} else if t2 == 0 {
 			power_pin.High()
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(250 * time.Millisecond)
 		} else {
 			for i := 0; i < ml; i++ {
 				if t1 > 0 {

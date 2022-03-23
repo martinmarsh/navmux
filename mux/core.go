@@ -10,7 +10,7 @@ import (
 	"navmux/io"
 	"os"
 	"time"
-	"syscall"
+	"os/exec"
 
 	"github.com/stianeikeland/go-rpio/v4"
 )
@@ -97,12 +97,18 @@ func Execute(config *ConfigData) {
 
 
 func Exit() {
-	var err error
-	err = syscall.Reboot(syscall.LINUX_REBOOT_CMD_POWER_OFF)
-	if err != nil {
-		fmt.Printf("power off failed: %v", err)
-	}
-	
-	os.Exit(1)
-	select {}
+	out, err := exec.Command("shutdown","-h","now").Output()
+
+    // if there is an error with our execution
+    // handle it here
+    if err != nil {
+        fmt.Printf("%s", err)
+    }
+    // as the out variable defined above is of type []byte we need to convert
+    // this to a string or else we will see garbage printed out in our console
+    // this is how we convert it to a string
+    fmt.Println("Command Successfully Executed")
+    output := string(out[:])
+    fmt.Println(output)
+
 }

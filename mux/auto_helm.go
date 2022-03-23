@@ -30,9 +30,9 @@ func checksum(s string) string {
 
 func autoHelmProcess(name string, config map[string][]string, channels *map[string](chan string)) {
 	var p_factor float32 = 100.0
-	var i_factor float32 = 5
-	var d_factor float32 = 25
-	var gain float32 = 0.001
+	var i_factor float32 = 2
+	var d_factor float32 = 50
+	var g_factor float32 = 100
 	var base_gain float32 = 0.00001
 
 	input := config["input"][0]
@@ -46,10 +46,10 @@ func autoHelmProcess(name string, config map[string][]string, channels *map[stri
 		d_factor = float32(d_f)
 	}
     if gain_factor, e := strconv.ParseFloat(config["gain_factor"][0], 32); e == nil{
-		gain = float32(gain_factor) * base_gain
+		g_factor = float32(gain_factor)
 	}
 	
-	go helm(name, input, channels, p_factor,i_factor, d_factor, gain, base_gain)
+	go helm(name, input, channels, p_factor,i_factor, d_factor, g_factor, base_gain)
 	
 }
 
@@ -60,7 +60,7 @@ func helm(
 	p_factor float32,
 	i_factor float32,
 	d_factor float32,
-	gain float32,
+	g_factor float32,
 	base_gain float32,
 ){
 	buffer_p := buffer.MakeFloatBuffer(20)
@@ -68,18 +68,18 @@ func helm(
 
 	var course_to_steer float32
 	var heading float32 = 0.0
-	var turn_rate float32 = 0.0
-	var rate_of_turn_rate float32 = 0.0
-	var prev_turn_rate float32 = 0.0
-	var prev_head float32 = 0.0
+	var rate_of_course_error_rate float32 = 0.0
+	var prev_course_error_rate float32 = 0.0
+	var prev_course_error float32 = 0.0
 	var auto_on bool = false
-
+	var course_error float32 = 0.0
+	var course_error_rate float32 = 0.0
+	var gain float32 = g_factor * base_gain
 
 	for {
 		str := <-(*channels)[input]
-		var delta float32
 		var err error
-		//fmt.Printf("Received helm command %s\n", str)
+		fmt.Printf("Received helm command %s\n", str)
 		if len(str)> 9 && str[0:6] == "$HCHDM"{
 			end_byte := len(str)
 			if str[end_byte-3] == '*' {
@@ -97,23 +97,45 @@ func helm(
 				hd, _ := strconv.ParseFloat(parts[1], 32)
 				heading = float32(hd)
 				//rate of change over 1.5 seconds given constant heading readings of 10ps
+				course_error = relative_direction(course_to_steer - heading)
 				if buffer_p.Count >= 15 {
-					prev_head = buffer_p.Read()
-					delta = heading - prev_head
+					prev_course_error = buffer_p.Read()
+					course_error_rate = course_error - prev_course_error
 					//fmt.Printf("Heading %.2f, %.2f %.3f\n", hd, prev_head, delta)
 				}
-				buffer_p.Write(heading)
-				// rate of change of the turn rate
-				turn_rate = relative_direction(delta) 
+				buffer_p.Write(course_error)
+				// rate of change of the course error rate
 				if buffer_d.Count >= 15 {
-					prev_turn_rate =  buffer_d.Read()
-					rate_of_turn_rate = turn_rate - prev_turn_rate 
+					prev_course_error_rate =  buffer_d.Read()
+					rate_of_course_error_rate = course_error_rate - prev_course_error_rate
 				}
-				buffer_d.Write(turn_rate)
+				buffer_d.Write(course_error_rate)
 			}
 		} else if str == "compute" && auto_on {
-			power_calc(course_to_steer, heading, turn_rate, rate_of_turn_rate, p_factor, i_factor, d_factor, gain)
+			power_calc(course_error, course_error_rate, rate_of_course_error_rate, p_factor, i_factor, d_factor, gain)
 		
+		} else if len(str) > 2 && str[0] == 'P'{
+			if value, e := cmd_value(str); e == nil {
+				p_factor = value
+				io.Beep("1l")
+			}
+		} else if len(str) > 2 && str[0] == 'D'{
+			if value, e := cmd_value(str); e == nil {
+				d_factor = value
+				io.Beep("1l")
+			}
+		} else if len(str) > 2 && str[0] == 'I'{
+			if value, e := cmd_value(str); e == nil {
+				i_factor = value
+				io.Beep("1l")
+			}
+		} else if len(str) > 2 && str[0] == 'G'{
+			if value, e := cmd_value(str); e == nil {
+				g_factor = value
+				gain = value * base_gain + 1
+				io.Beep("1l")
+			}
+	
 		} else if len(str) > 0 && len(str) < 4 {
 			// do key commands
 			switch str[0] { 
@@ -141,19 +163,21 @@ func helm(
 					if value == 0 {
 						course_to_steer = heading
 						auto_on = true
-						power_calc(course_to_steer, heading, turn_rate, rate_of_turn_rate, p_factor, i_factor, d_factor, gain)
+						power_calc(course_error, course_error_rate, rate_of_course_error_rate, p_factor, i_factor, d_factor, gain)
 						io.Beep("3s")
 					}
 				}
 			case '8':
 				if value, e := cmd_value(str); e == nil {
-					gain += value
+					g_factor += value
+					gain = g_factor * base_gain
 					io.Beep("5s")
 				}
 			case '2':
 				if value, e := cmd_value(str); e == nil {
-					if gain > value {
-						gain -= value
+					if g_factor > value {
+						g_factor -= value
+						gain = g_factor * base_gain
 						io.Beep("4s")
 					}
 				}
@@ -187,26 +211,30 @@ func cmd_value(str string) (float32, error) {
 	}
 }
 
-func power_calc(course_to_steer, heading, turn_rate, rate_of_turn_rate, p_factor, i_factor, d_factor, gain float32){
+func power_calc(course_error, course_error_rate, rate_of_course_error_rate, p_factor, i_factor, d_factor, gain float32){
 	/*
-	Control is based on PID principles. Considering that when Power is applied it does not indicate a
-	position of the rudder but a constant movement and increase in rudder position therefore it is in fact
-	an integration.  Therefore a constant power is adjusted by an integration factor and not a proportional one
-	There are 4 factors:
+	Control is based on PID principles. However, in our case we don't get feedback from the contol surface
+	but from the change of direction of the boat.  A constant compass error would produce an output from
+	a PID which would continue to drive the rudder position and in effect integrate the turning force.
+	To compensate for the in built integrator we differentiate all inputs from the streering compass
+
+	There are 4 response control factors:
 	p_factor - proportional gain
 	i_factor - integral gain
 	d_factor - differential gain
 	gain - overall gain used to control sensitivity and scale the PID to values required by the motor driver
+	
 	*/
-
+	fmt.Printf("course error %.2f, course rate %.3f, raterate %.4f , gain %.6f\n", course_error, course_error_rate, rate_of_course_error_rate, gain)
 	// Error correction is a constant value which integrates so is scaled by I
-	integral := relative_direction(course_to_steer - heading) * i_factor
-	// The rate of turn is in fact proportional
-	proportional := turn_rate * p_factor
-	// The rate of change of the turn rate is the differential in our case
-	differential := rate_of_turn_rate * d_factor
+	integration := course_error * i_factor
+	// The rate of course_error change is in fact proportional
+	proportional := course_error_rate * p_factor
+	// The rate of change of the course_error_rate is the differential in our case
+	differential := rate_of_course_error_rate * d_factor
+	fmt.Printf("integration %.2f, proportional %.3f, diff %.4f \n", integration, proportional, differential)
 
-	power := (integral - proportional + differential) * gain
+	power := (integration + proportional + differential) * gain
 	power_manager(power)
 }
 
@@ -216,7 +244,7 @@ func power_manager(power float32){
 	if power  > 0 {
 		pi = 1
 	}
-	//fmt.Printf("power %c %f\n",prefix[pi], math.Abs(power))
-	io.Helm(prefix[pi], math.Abs(float64(power )))
+
+	io.Helm(prefix[pi], math.Abs(float64(power)))
 }
 
