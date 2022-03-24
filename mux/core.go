@@ -85,10 +85,20 @@ func Execute(config *ConfigData) {
 	for {
 		command := <-(channels["command"])
 		fmt.Printf("Command '%s' received\n", command)
-		switch command {
-		case "99":
+		if command == "99" {
 			io.Beep("2l")
 			Exit()
+		} else if len(command) > 1 && len(command) <=5 {
+			switch command[0]{
+			case '1':
+				channels["to_helm"] <- "P" + command[1:]
+			case '2':
+				channels["to_helm"] <- "I" + command[1:]
+			case '3':
+				channels["to_helm"] <- "D" + command[1:]
+			case '4':
+				channels["to_helm"] <- "G" + command[1:]
+			}
 			
 				
 		}

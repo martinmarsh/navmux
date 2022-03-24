@@ -33,7 +33,7 @@ func autoHelmProcess(name string, config map[string][]string, channels *map[stri
 
 	pid := pid.MakePid(1, 0.2, 0.5, 0.00001)
 
-	pid.Scale_gain =100
+	pid.Scale_gain = 100
 	pid.Scale_kd = 100
 	pid.Scale_ki = 100
 	pid.Scale_kp = 100
@@ -60,17 +60,17 @@ func autoHelmProcess(name string, config map[string][]string, channels *map[stri
 // Helm takes collects instructions and a compass bearing at 10hz from the input channel
 // A PID is used to calculate the actuating signal which is sent to the motor controller.
 // The helm motor runs with a speed defined by actuating signal (AS) value either left or right
-// rotation; turning the wheel continuously.  The rudder is not driven to a position by the AS
-// as would be required if the error signal was based on the course error. The boat would not
-// be steering straight ahead at zero error but the rudder would be only just be comming
-// to a halt at the maximum deflection.  In short the integration effect would make steering 
-// unstable at any proportional gain. To overcome this issue  we consider that the rudder position
-// can be sensed by the rate of turn of the boat. Zero rate of turn is straight ahead.
-//
-// We therefore use the rate of course change as the feedback signal to calculate the error for the
-// PID.  It would not make sense to subtract the rate of turn from the desired heading so the desired
-// heading is converted to a desired rate of turn.  This has 2 benfits: 
-// 1) The turn rate is controlled and is not too excessive for large corrections or tacking
+// rotation; turning the wheel continuously.  The rudder position cannot be sensed nor is it 
+// driven to a position as determined by the AS value. This would be required for the error signal
+// to be based on the course error.  Then at zero error the rudder will be near centre but in our
+// system it would be just be comming to a halt at the maximum deflection.  In short there is an 
+// integration effect  making steering unstable at any proportional gain setting.
+
+// To overcome this problem the effective rudder position can be sensed by the rate of turn of the boat.
+// Then Zero rate of turn is straight ahead. Hence the rate of course change is used as the feedback signal
+// to calculate the error for the PID.  The set point can then be defined as the desired rate of turn to
+// reach the desired course.  This has 2 benfits: 
+// 1) The turn rate is controlled and is not too excessive for large corrections or tacking.
 // 2) The rudder effectiveness which varies greatly with boat speed is automatically compensated.
 // 
 // The PID calculates the AS signal for every Compass input at a constant 10Hz.  The motor calls
@@ -88,6 +88,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 
 	var auto_on bool = false
 	var heading float64 = 0.0
+	var actuating_signal = 0.0
 
 	for {
 		str := <-(*channels)[input]
@@ -110,12 +111,12 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 				heading, _ = strconv.ParseFloat(parts[1], 64)
 				average_count := 0
 				previous := 0.0
+				// the turn rate is averaged across 3s, 1.5s and 0.5s periods
 		
 				if buffer_3.Count >= 30 {
 					previous := buffer_3.Read()
 					turn_rate = (heading - previous)/3
 					average_count++ 
-					//fmt.Printf("Heading %.2f, %.2f %.3f\n", hd, prev_head, delta)
 				}
 				buffer_3.Write(heading)
 
@@ -123,47 +124,44 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 					previous = buffer_1_5.Read()
 					turn_rate += relative_direction(heading - previous)/1.5 
 					average_count++ 
-					//fmt.Printf("Heading %.2f, %.2f %.3f\n", hd, prev_head, delta)
 				}
 				buffer_3.Write(heading)
 
 				if buffer_0_5.Count >= 5 {
-					previous = buffer_1_5.Read()
+					previous = buffer_0_5.Read()
 					turn_rate += relative_direction(heading - previous)/0.5 
 					average_count++ 
-					//fmt.Printf("Heading %.2f, %.2f %.3f\n", hd, prev_head, delta)
 				}
-				buffer_3.Write(heading)
+				buffer_0_5.Write(heading)
 
 				if average_count > 0 {
 					turn_rate /= float64(average_count)
 					desired_rate_of_turn = relative_direction(course_to_steer - heading)/5  //5s to correct
-					av := pid.Compute(desired_rate_of_turn - turn_rate )
-					io.Helm(1, av)
+					actuating_signal = pid.Compute(desired_rate_of_turn - turn_rate )
 				}
 				
 			}
 		} else if str == "compute" && auto_on {
-			
+			io.Helm(1, actuating_signal)
 		
 		} else if len(str) > 2 && str[0] == 'P'{
-			if value, e := cmd_value(str); e == nil {
+			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_kp = value
 				io.Beep("1l")
 			}
 		} else if len(str) > 2 && str[0] == 'D'{
-			if value, e := cmd_value(str); e == nil {
+			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_kd = value
 				io.Beep("1l")
 			}
 		} else if len(str) > 2 && str[0] == 'I'{
-			if value, e := cmd_value(str); e == nil {
+			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_ki = value
 				io.Beep("1l")
 			}
 		} else if len(str) > 2 && str[0] == 'G'{
-			if value, e := cmd_value(str); e == nil {
-				pid.Scale_gain -= value
+			if value, e := cmd_value(str[1:]); e == nil {
+				pid.Scale_gain = value
 				io.Beep("1l")
 			}
 	
