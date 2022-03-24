@@ -7,10 +7,11 @@ package io
 
 import (
 	"fmt"
-	"time"
+	"math"
 	"strconv"
-	"github.com/stianeikeland/go-rpio/v4"
+	"time"
 
+	"github.com/stianeikeland/go-rpio/v4"
 	//"periph.io/x/periph/conn/gpio"
 	//"periph.io/x/periph/host"
 	//"periph.io/x/periph/host/rpi"
@@ -19,7 +20,7 @@ import (
 
 type helm_control struct {
     control byte
-    power  float32
+    power  float64
 }
 
 var Beep_channel chan string
@@ -65,11 +66,21 @@ func Beep(style string){
 	Beep_channel <- style
 }
 
-func Helm(control byte, power_ratio float64){
-	// control = R L or X for Left Right or OFF
+func Helm(control byte, power float64){
+	// control = 1 if power is a signed value
+	// control = 0 to turn off motor
+	// control = 'L' or 'R' if power is unsigned
+	if control == 1 {
+		control = 'R'
+		if power < 0 {
+			control = 'L'
+			power = math.Abs(power)
+		}
+
+	}
 	message :=  helm_control{
 		control: control,
-		power: float32(power_ratio),   	// <=1 1 = 100%
+		power: power,   	// <=1 1 = 100%
 	}
 	fmt.Println(message)
 	Motor_channel <- message
@@ -103,7 +114,7 @@ func helmTask(channels *map[string](chan string)){
 				right_pin.High()
 				//rpi.P1_18.Out(gpio.Low)
 				//rpi.P1_16.Out(gpio.High)
-			case 'X':
+			case 1:
 			default:
 				left_pin.Low()
 				right_pin.Low()
@@ -123,7 +134,7 @@ func helmTask(channels *map[string](chan string)){
 			} else if motor.power < 0.02{
 				p1 = 0
 			} else {
-				p1 = int(float32(mp) * motor.power)
+				p1 = int(float64(mp) * motor.power)
 			}
 			t1 = time.Duration(p1) * time.Microsecond
 			t2 = time.Duration(mp - p1) * time.Microsecond

@@ -86,7 +86,7 @@ func (cb *circular_byte_buffer) Read_byte() (byte, error) {
 
 type circular_float_buffer struct {
 	end int
-	buffer [] float32
+	buffer [] float64
 	read_pos int
 	write_pos int
 	Count int
@@ -96,7 +96,7 @@ type circular_float_buffer struct {
 func MakeFloatBuffer(size int) *circular_float_buffer{
 	p := circular_float_buffer {
 		end: size -1,
-		buffer: make([]float32, size),
+		buffer: make([]float64, size),
 		read_pos: 0,
 		write_pos: 0,
 		Count: 0,
@@ -104,7 +104,7 @@ func MakeFloatBuffer(size int) *circular_float_buffer{
 	return &p
 }
 
-func (cb *circular_float_buffer) Write(fv float32) {
+func (cb *circular_float_buffer) Write(fv float64) {
 	if cb.write_pos >= cb.end {
 		cb.write_pos = 0
 	}
@@ -113,7 +113,7 @@ func (cb *circular_float_buffer) Write(fv float32) {
 	cb.Count++
 }
 
-func (cb *circular_float_buffer) Read() float32 {
+func (cb *circular_float_buffer) Read() float64 {
 	if cb.read_pos >= cb.end {
 		cb.read_pos = 0
 	}
