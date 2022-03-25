@@ -44,6 +44,10 @@ func MakePid(kp, ki, kd, gain float64) *Pid {
 	return &p
 } 
 
+func (p *Pid) Reset() {
+	p.integral = 0
+}
+
 // Compute the Actuating Signal from the error term
 // The error term is supplied externally and is typically the command signal (or Set Point )
 // minus the Process Variable (feed back value).  
@@ -61,6 +65,7 @@ func (p *Pid) Compute(error float64) float64 {
 
 	p.integral += i_in
 	differential := d_inc - p.last
+	p.last = d_inc
 
 	as := (p.integral + proportional + differential) * p.gain * p.Scale_gain
 

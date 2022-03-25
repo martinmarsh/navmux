@@ -29,17 +29,18 @@ func shipsLogProcess(name string, config map[string][]string, channels *map[stri
 func fileLogger(name string, writer *bufio.Writer, input string, channels *map[string](chan string)){
 	const every = 100
 	count := every
+	handle := nmea.Setup()
 	for {
 		str := <-(*channels)[input]
 		// fmt.Printf("Recieved log %s\n", str)
 		if len(str)>5 && len(str)<89 && str[0] == '$'{
 			// fmt.Printf("counter is %d\n", count)
 	        count -= 1
-			nmea.Handle.Parse(str)
+			handle.Parse(str)
 			if count == 0 {
 				count = every
 				
-				data_map := nmea.Handle.GetMap()
+				data_map := handle.GetMap()
 				data_json, _ := json.Marshal(data_map)
 				
 				rec_str := fmt.Sprintf("%s\n", string(data_json))

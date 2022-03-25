@@ -31,7 +31,7 @@ func checksum(s string) string {
 func autoHelmProcess(name string, config map[string][]string, channels *map[string](chan string)) {
 	
 
-	pid := pid.MakePid(1, 0.2, 0.5, 0.00001)
+	pid := pid.MakePid(1, 0.1, 0.3, 0.00001)
 
 	pid.Scale_gain = 100
 	pid.Scale_kd = 100
@@ -112,56 +112,65 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 				average_count := 0
 				previous := 0.0
 				// the turn rate is averaged across 3s, 1.5s and 0.5s periods
-		
+				
 				if buffer_3.Count >= 30 {
 					previous := buffer_3.Read()
 					turn_rate = (heading - previous)/3
 					average_count++ 
 				}
 				buffer_3.Write(heading)
-
+				
 				if buffer_1_5.Count >= 15 {
 					previous = buffer_1_5.Read()
 					turn_rate += relative_direction(heading - previous)/1.5 
 					average_count++ 
 				}
-				buffer_3.Write(heading)
-
+				buffer_1_5.Write(heading)
+				
 				if buffer_0_5.Count >= 5 {
 					previous = buffer_0_5.Read()
 					turn_rate += relative_direction(heading - previous)/0.5 
 					average_count++ 
 				}
 				buffer_0_5.Write(heading)
-
+			
 				if average_count > 0 {
 					turn_rate /= float64(average_count)
 					desired_rate_of_turn = relative_direction(course_to_steer - heading)/5  //5s to correct
+					fmt.Printf("Turn Rate %.3f, desired direction %.3f\n", turn_rate, desired_rate_of_turn)
 					actuating_signal = pid.Compute(desired_rate_of_turn - turn_rate )
+					if !auto_on {
+						pid.Reset()
+					} 
 				}
 				
 			}
 		} else if str == "compute" && auto_on {
 			io.Helm(1, actuating_signal)
+			pid.Reset()
 		
 		} else if len(str) > 2 && str[0] == 'P'{
 			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_kp = value
+				pid.Reset()
 				io.Beep("1l")
 			}
 		} else if len(str) > 2 && str[0] == 'D'{
 			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_kd = value
+				pid.Reset()
 				io.Beep("1l")
 			}
 		} else if len(str) > 2 && str[0] == 'I'{
 			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_ki = value
+				pid.Reset()
 				io.Beep("1l")
 			}
 		} else if len(str) > 2 && str[0] == 'G'{
 			if value, e := cmd_value(str[1:]); e == nil {
 				pid.Scale_gain = value
+				pid.Reset()
 				io.Beep("1l")
 			}
 	
@@ -171,11 +180,13 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 			case '4':
 				if value, e := cmd_value(str); e == nil {
 					course_to_steer =  relative_direction(course_to_steer - value)
+					pid.Reset()
 					io.Beep("2s")
 				}
 			case '6':
 				if value, e := cmd_value(str); e == nil {
 					course_to_steer =  relative_direction(course_to_steer + value)
+					pid.Reset()
 					io.Beep("1s")
 				}
 			case '1':
@@ -191,6 +202,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 				if value, e := cmd_value(str); e == nil {
 					if value == 0 {
 						course_to_steer = heading
+						pid.Reset()
 						auto_on = true
 						io.Helm(1, 0)
 						io.Beep("3s")
@@ -199,12 +211,14 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 			case '8':
 				if value, e := cmd_value(str); e == nil {
 					pid.Scale_gain *= value
+					pid.Reset()
 					io.Beep("5s")
 				}
 			case '2':
 				if value, e := cmd_value(str); e == nil {
 					if value > 1 {
 						pid.Scale_gain /= value
+						pid.Reset()
 						io.Beep("4s")
 					}
 				}
@@ -215,6 +229,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 						pid.Scale_kd = 100
 						pid.Scale_ki = 100
 						pid.Scale_kp = 100
+						pid.Reset()
 						io.Beep("1s")
 						io.Beep("1l")
 					}
@@ -222,12 +237,14 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 			case '9':
 				if value, e := cmd_value(str); e == nil {
 					pid.Scale_ki *= value
+					pid.Reset()
 					io.Beep("2l")
 				}
 			case '3':
 				if value, e := cmd_value(str); e == nil {
 					if value > 1 {
 						pid.Scale_ki /= value
+						pid.Reset()
 						io.Beep("1l")
 					}
 				}
