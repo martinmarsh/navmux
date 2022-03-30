@@ -31,7 +31,7 @@ func checksum(s string) string {
 func autoHelmProcess(name string, config map[string][]string, channels *map[string](chan string)) {
 	
 
-	pid := pid.MakePid(1, 0.2, 0.5, 0.00001)
+	pid := pid.MakePid(1, 0.2, 0.5, 0.00001, 0.95)
 
 	pid.Scale_gain = 100
 	pid.Scale_kd = 100
@@ -137,7 +137,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 				if average_count > 0 {
 					turn_rate /= float64(average_count)
 					desired_rate_of_turn = relative_direction(course_to_steer - heading)/5  //5s to correct
-					actuating_signal = pid.Compute(desired_rate_of_turn - turn_rate )
+					actuating_signal = pid.Compute(desired_rate_of_turn - turn_rate, turn_rate)
 				}
 				
 			}

@@ -27,30 +27,40 @@ func shipsLogProcess(name string, config map[string][]string, channels *map[stri
 
 
 func fileLogger(name string, writer *bufio.Writer, input string, channels *map[string](chan string)){
-	const every = 100
-	count := every
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
 	for {
-		str := <-(*channels)[input]
-		// fmt.Printf("Recieved log %s\n", str)
-		if len(str)>5 && len(str)<89 && str[0] == '$'{
-			// fmt.Printf("counter is %d\n", count)
-	        count -= 1
-			nmea.Handle.Parse(str)
-			if count == 0 {
-				count = every
+		select {
+		case str := <-(*channels)[input]:
+			parse(str)
+		case <-ticker.C:
+			data_map := nmea.Handle.GetMap()
+			data_json, _ := json.Marshal(data_map)
 				
-				data_map := nmea.Handle.GetMap()
-				data_json, _ := json.Marshal(data_map)
-				
-				rec_str := fmt.Sprintf("%s\n", string(data_json))
-				fmt.Println(rec_str)
+			rec_str := fmt.Sprintf("%s\n", string(data_json))
+			fmt.Println(rec_str)
 
-				_, err := writer.WriteString(rec_str)
-				if err != nil {
-					fmt.Println("FATAL Error on write" + name)
-				}
-				writer.Flush()
+			_, err := writer.WriteString(rec_str)
+			if err != nil {
+				fmt.Println("FATAL Error on write" + name)
 			}
+			writer.Flush()
 		}	
 	}
+}
+
+func parse(str string) error{
+
+	defer func(){
+		if r := recover(); r != nil {
+			str = ""
+		}
+	}()
+
+	if len(str)>5 && len(str)<89 && str[0] == '$'{
+		// fmt.Printf("counter is %d\n", count)
+		_, _, error := nmea.Handle.Parse(str)
+		return error
+	}
+	return fmt.Errorf("%s", "no leading dollar")
 }
