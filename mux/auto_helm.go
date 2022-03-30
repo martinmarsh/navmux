@@ -114,7 +114,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 				
 				if buffer_3.Count >= 30 {
 					previous := buffer_3.Read()
-					turn_rate = (heading - previous)/3
+					turn_rate = relative_direction(heading - previous)/3
 					average_count++ 
 				}
 				buffer_3.Write(heading)
@@ -135,7 +135,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 			
 				if average_count > 0 {
 					turn_rate /= float64(average_count)
-					desired_rate_of_turn = relative_direction(course_to_steer - heading)/5  //5s to correct
+					desired_rate_of_turn = relative_direction(course_to_steer - heading)/5.0  //5s to correct
 					actuating_signal = pid.Compute(desired_rate_of_turn - turn_rate, turn_rate)
 					fmt.Printf("Turn Rate %.3f, desired direction %.3f\n", turn_rate, desired_rate_of_turn)
 					if !auto_on {
