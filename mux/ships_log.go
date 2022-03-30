@@ -1,12 +1,14 @@
 package mux
 
 import (
-	"navmux/nmea"
-	"fmt"
-	"os"
-	"time"
 	"bufio"
 	"encoding/json"
+	"fmt"
+	"navmux/nmea"
+	"os"
+	"time"
+
+	"github.com/martinmarsh/nmea0183"
 )
 
 
@@ -29,12 +31,13 @@ func shipsLogProcess(name string, config map[string][]string, channels *map[stri
 func fileLogger(name string, writer *bufio.Writer, input string, channels *map[string](chan string)){
 	ticker := time.NewTicker(15 * time.Second)
 	defer ticker.Stop()
+	handle := nmea.Setup()
 	for {
 		select {
 		case str := <-(*channels)[input]:
-			parse(str)
+			parse(str, handle)
 		case <-ticker.C:
-			data_map := nmea.Handle.GetMap()
+			data_map := handle.GetMap()
 			data_json, _ := json.Marshal(data_map)
 				
 			rec_str := fmt.Sprintf("%s\n", string(data_json))
@@ -42,14 +45,15 @@ func fileLogger(name string, writer *bufio.Writer, input string, channels *map[s
 
 			_, err := writer.WriteString(rec_str)
 			if err != nil {
-				fmt.Println("FATAL Error on write" + name)
+				fmt.Println("FATAL Error on write" + name)	
+				writer.Flush()
 			}
 			writer.Flush()
 		}	
 	}
 }
 
-func parse(str string) error{
+func parse(str string, handle *nmea0183.Handle) error{
 
 	defer func(){
 		if r := recover(); r != nil {
@@ -59,7 +63,7 @@ func parse(str string) error{
 
 	if len(str)>5 && len(str)<89 && str[0] == '$'{
 		// fmt.Printf("counter is %d\n", count)
-		_, _, error := nmea.Handle.Parse(str)
+		_, _, error := handle.Parse(str)
 		return error
 	}
 	return fmt.Errorf("%s", "no leading dollar")
