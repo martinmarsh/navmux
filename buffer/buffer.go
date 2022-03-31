@@ -56,7 +56,7 @@ func (cb *circular_byte_buffer) ReadString() string {
 			}
 			i++
 			if i >= cb.ret_size{
-				fmt.Println("No CR in string corrupt o/p = %s\n", string(cb.ret_buffer[:i]) )
+				fmt.Printf("No CR in string corrupt o/p = %s\n", string(cb.ret_buffer[:i]) )
 				return string(cb.ret_buffer[:i])
 			}
 		}

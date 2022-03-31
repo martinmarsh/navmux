@@ -7,6 +7,8 @@ import (
 	"navmux/pid"
 	"strconv"
 	"strings"
+	"time"
+
 
 )
 
@@ -30,7 +32,7 @@ func checksum(s string) string {
 
 func autoHelmProcess(name string, config map[string][]string, channels *map[string](chan string)) {
 	
-	pid := pid.MakePid(1, 0.1, 0.3, 0.00001, 0.95)
+	pid := pid.MakePid(1, 0.05, 0.1, 0.00001, 0.95)
 
 	pid.Scale_gain = 100
 	pid.Scale_kd = 100
@@ -88,13 +90,16 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 	var auto_on bool = false
 	var heading float64 = 0.0
 	var actuating_signal = 0.0
+	var last_compass_time = time.Now()
+	var compass_counter = 0 
 
 	for {
 		str := <-(*channels)[input]
 		var err error
-		fmt.Printf("Received helm command %s\n", str)
+		// fmt.Printf("Received helm command %s\n", str)
 		if len(str)> 9 && str[0:6] == "$HCHDM"{
 			end_byte := len(str)
+			err = nil
 			if str[end_byte-3] == '*' {
 				check_code := checksum(str[:end_byte-3])
 				end_byte -= 2
@@ -105,7 +110,18 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 				end_byte--
 			}
 		
-			if err == nil{
+			if err == nil {
+				compass_counter++
+				if compass_counter > 99 {
+					t := time.Now()
+					interval := t.Sub(last_compass_time)
+					last_compass_time = t
+					if interval > 11000 * time.Millisecond || interval < 9500 * time.Millisecond{
+						fmt.Printf("Compass period for %v error %v ms\n", compass_counter, interval.Milliseconds())
+						io.Beep("1s")
+					}
+					compass_counter = 0
+				}
 				parts := strings.Split(str[1:end_byte], ",")
 				heading, _ = strconv.ParseFloat(parts[1], 64)
 				average_count := 0
@@ -137,7 +153,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 					turn_rate /= float64(average_count)
 					desired_rate_of_turn = relative_direction(course_to_steer - heading)/5.0  //5s to correct
 					actuating_signal = pid.Compute(desired_rate_of_turn - turn_rate, turn_rate)
-					fmt.Printf("Turn Rate %.3f, desired direction %.3f\n", turn_rate, desired_rate_of_turn)
+					// fmt.Printf("Turn Rate %.3f, desired direction %.3f\n", turn_rate, desired_rate_of_turn)
 					if !auto_on {
 						pid.Reset()
 					} 
@@ -174,6 +190,10 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 			}
 	
 		} else if len(str) > 0 && len(str) < 4 {
+			fmt.Printf("Turn Rate %.3f, desired direction %.3f\n", turn_rate, desired_rate_of_turn)
+			fmt.Printf("Auto factor; gain:%.7f  p: %.1f i:%.1f d: %.1f\n", pid.Scale_gain, pid.Scale_kp, pid.Scale_ki, pid.Scale_kd)
+			fmt.Printf("actuation : %.4f\n", actuating_signal)
+			fmt.Printf("Received helm key command %s\n", str)
 			// do key commands
 			switch str[0] { 
 			case '4':
@@ -194,7 +214,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 						auto_on = false
 						io.Helm(0, 0)
 						io.Beep("1l")
-						fmt.Printf("Auto factor; gain:%.7f  p: %.1f i:%.1f d: %.1f\n", pid.Scale_gain, pid.Scale_kp, pid.Scale_ki, pid.Scale_kd)
+						
 					}
 				}
 			case '7':
@@ -232,6 +252,7 @@ func helm(name string,  input string, channels *map[string](chan string), pid *p
 						io.Beep("1s")
 						io.Beep("1l")
 					}
+					
 				}
 			case '9':
 				if value, e := cmd_value(str); e == nil {

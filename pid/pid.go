@@ -6,7 +6,6 @@ Copyright © 2022 Martin Marsh martin@marshtrio.com
 package pid
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -79,8 +78,6 @@ func (p *Pid) Compute(sp_pv, pv float64) float64 {
 			p.integral -= i_in
 		}
 	}
-
-	fmt.Printf("integration %.2f, proportional %.3f, diff %.4f  actuation : %.4f\n", p.integral, proportional, differential, as)
 
 	return as	
 }

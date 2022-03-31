@@ -6,7 +6,7 @@ Copyright © 2022 Martin Marsh martin@marshtrio.com
 package io
 
 import (
-	"fmt"
+	// "fmt"
 	"math"
 	"strconv"
 	"time"
@@ -82,7 +82,7 @@ func Helm(control byte, power float64){
 		control: control,
 		power: power,   	// <=1 1 = 100%
 	}
-	fmt.Println(message)
+	// fmt.Println(message)
 	Motor_channel <- message
 }
 
@@ -102,7 +102,7 @@ func helmTask(channels *map[string](chan string)){
 
 		select {
 		case motor := <- Motor_channel:
-			fmt.Println("motor control")
+			// fmt.Println("motor control")
 			switch motor.control {
 			case 'L':
 				right_pin.Low()
