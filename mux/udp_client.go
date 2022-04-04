@@ -8,7 +8,7 @@ package mux
 import (
 	"fmt"
 	"net"
-
+	"time"
 )
 
 func udpClientProcess(name string, config map[string][]string, channels *map[string](chan string)) {
@@ -31,9 +31,10 @@ func udpWriter(name string, server_addr string, input string, channels *map[stri
 			fmt.Printf("Could not open udp server %s\n", name)
 			//ensure channel is cleared then retry
 			connection = false
-			for i :=0 ; i > 100; i++ {
+			for i :=0 ; i > 1000; i++ {
 				<-(*channels)[input]
 			}
+			time.Sleep(3 * time.Second)
 		} else {
 			defer conn.Close()
 			fmt.Printf("Established connection to %s \n", server_addr)
