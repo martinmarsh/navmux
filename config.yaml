@@ -39,13 +39,10 @@ udp:
     input: to_udp_client
     server_address: 192.168.1.14:8011
 
-helm:
-    type: auto-helm
-    p_factor: 100
-    i_factor: 100
-    d_factor: 100
-    gain_factor: 100
-    input: to_helm
+udp2:
+    type:  udp_client
+    input: to_udp2_client
+    server_address: 192.168.1.167:8005
 
 keys:
     type: keyboard
