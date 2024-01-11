@@ -2,8 +2,7 @@ package mux
 
 import (
 	"fmt"
-	"navmux/buffer"
-	"navmux/io"
+	"navmux/buffer"  // "navmux/io"
 	"navmux/pid"
 	"strconv"
 	"strings"

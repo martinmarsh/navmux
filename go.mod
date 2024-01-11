@@ -6,7 +6,7 @@ require (
 	github.com/martinmarsh/nmea0183 v0.1.3
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/stianeikeland/go-rpio/v4 v4.6.0
+	// github.com/stianeikeland/go-rpio/v4 v4.6.0
 	go.bug.st/serial v1.3.5
 )
 

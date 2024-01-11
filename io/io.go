@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/stianeikeland/go-rpio/v4"
+	//"github.com/stianeikeland/go-rpio/v4"
 	//"periph.io/x/periph/conn/gpio"
 	//"periph.io/x/periph/host"
 	//"periph.io/x/periph/host/rpi"

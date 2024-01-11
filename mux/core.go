@@ -7,12 +7,12 @@ package mux
 
 import (
 	"fmt"
-	"navmux/io"
-	"os"
+	//"navmux/io"
+	//"os"
 	"time"
 	"os/exec"
 
-	"github.com/stianeikeland/go-rpio/v4"
+	// "github.com/stianeikeland/go-rpio/v4"
 )
 
 type ConfigData struct {
@@ -47,7 +47,7 @@ func Execute(config *ConfigData) {
 			}
 		}
 	}
-
+/*
 	if err := rpio.Open(); err != nil {
 		fmt.Println("RPIO - could not be openned")
 		fmt.Println(err)
@@ -59,6 +59,7 @@ func Execute(config *ConfigData) {
 		fmt.Println("Failed to set up gpio")
 		panic("error GPIO")
 	}
+*/
 
 	for processType, names := range config.TypeList {
 		fmt.Println(processType, names)
@@ -72,21 +73,21 @@ func Execute(config *ConfigData) {
 				keyBoardProcess(name, config.Values[name], &channels)
 			case "ships_log":
 				shipsLogProcess(name, config.Values[name], &channels)
-			case "auto-helm":
-				autoHelmProcess(name, config.Values[name], &channels)
+			//case "auto-helm":
+				//autoHelmProcess(name, config.Values[name], &channels)
 					
 			}
 		}
 	}
 
 	
-	io.Beep("1s")
+	// io.Beep("1s")
 	
 	for {
 		command := <-(channels["command"])
 		fmt.Printf("Command '%s' received\n", command)
 		if command == "99" {
-			io.Beep("2l")
+			//io.Beep("2l")
 			Exit()
 		} else if len(command) > 1 && len(command) <=5 {
 			switch command[0]{
