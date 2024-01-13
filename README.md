@@ -9,7 +9,7 @@ udp ports.  These would typically be NMEA 0183 navigation messages inlcuding AIS
 
 The package can also decode NMEA 0183 messages and log data. 
 
-The use of yaml config allows an inputs to be passed to multiple inputs.
+A yaml config file read on start up is used to define how messages are routed to different devices/ports
 
 Typically a usb serial port adapter plugged into the Rpi would collect legacy 0183 messages and pass them to different out put serial ports, UDP clients and to a log function.
 
