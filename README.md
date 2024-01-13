@@ -1,23 +1,90 @@
 # navmux
 
-Test project evaluate writing the equivalent of boat repro using go.
+## version v0.1.0
 
-The concept has been improved by using yaml config which will it easier to define inputs and routing to outputs
+Designed to run on Raspberian and tested on a Raspberry PI 3B.
 
-The concept is to use a Raspberry Pi (Rpi) or similar to route NMEA 0183 messages from different inputs to various outputs.
+The idea to be be able to pass to and/or collate messages from different sources such as serial ports and
+udp ports.  These would typically be NMEA 0183 navigation messages inlcuding AIS.
 
-Typically a usb serial port adapter plugged into the Rpi would collect legacy 0183 messages and pass then to different out put serial ports.
+The package can also decode NMEA 0183 messages and log data. 
 
-Messages can be mixed between ports and other processing packages such as a logger and udp server.
-If a 2000 network bridge is used then messages on the 2000 network can be shared and devices on the 2000 network can use data from 0183 devices.
- 
+The use of yaml config allows an inputs to be passed to multiple inputs.
+
+Typically a usb serial port adapter plugged into the Rpi would collect legacy 0183 messages and pass them to different out put serial ports, UDP clients and to a log function.
+
+If a 2000 network bridge is used then messages on the NMEA 2000 network can be directed to NMEA 0183 devices and to OpenCPN via UDP.  Also NMEA 0183 messages can then be passed to the NMEA 2000 network.
+
 Commercial muxs can be bought but they don't allow sharing with added code packages which is the main advantage of this approach apart from cost. 
 
 For example:
 
 The udp server will be useful to connect to OpenCPN to allow display of navigation data
 
-The log package will be useful for basic logging
+The log package will be useful for basic logging of NMEA messages
 
-Some optional packages will be available if prepeared to construct some basic hardware for the Rpi eg The compass chip reading code, tone outputs, autohelm drive 
+## Example config and explantion:
+```
+ # A digital compass on serial port /dev/ttyUSB0
+ # sends NMEA 0183 messages
+ # to the queues listed in ouputs
+compass:
+    name: /dev/ttyUSB0
+    type: serial
+    baud:  4800
+    outputs:
+      - to_log
+      - to_udp_autohelm
+      - to_2000
+      - to_udp_client
+
+# A NMEA 2000 bridge sends NMEA 0183 messages to
+# the queues listed in ouputs and reads messages
+# from the "to_2000" queue
+bridge:
+    name: /dev/ttyUSB1
+    type: serial
+    baud: 38400
+    input: to_2000
+    outputs:
+      - to_log
+      - to_udp_client
+
+# A AIS reciever sends NMEA 0183 messages to
+# the queues listed in ouputs
+ais:
+    name: /dev/ttyUSB3
+    type: serial
+    baud: 38400
+    outputs:
+      - to_2000
+      - to_udp_client
+
+# The ships_log system reads the to_log queue,
+# processes the NMEA 0183 messages
+# and logs the data
+log:
+    type: ships_log
+    input: to_log
+
+# A UPD client reads the to to_udp_client queue and
+# send messages to another
+# RPI running openCPN plotter which listens
+# on port 8011
+udp_opencpn:
+    type:  udp_client
+    input: to_udp_client 
+    server_address: 192.168.1.14:8011
+
+# A UPD client reads the to to_udp_client queue and
+# send messages to another
+# RPI running openCPN plotter which listens
+# on port 8011
+udp_autohelm:
+    type:  udp_client
+    input: to_udp_autohelm
+    server_address: 127.0.0.0:8006
+```
+
+
 

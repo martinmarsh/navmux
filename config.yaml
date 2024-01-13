@@ -8,7 +8,7 @@ compass:
     baud:  4800
     outputs:
       - to_log
-      - to_helm
+      - to_udp_autohelm
       - to_2000
       - to_udp_client
 
@@ -34,22 +34,12 @@ log:
     type: ships_log
     input: to_log
 
-udp:
+udp_opencpn:
     type:  udp_client
     input: to_udp_client
     server_address: 192.168.1.14:8011
 
-helm:
-    type: auto-helm
-    p_factor: 100
-    i_factor: 100
-    d_factor: 100
-    gain_factor: 100
-    input: to_helm
-
-keys:
-    type: keyboard
-    outputs: 
-        - to_helm
-
-
+udp_autohelm:
+    type:  udp_client
+    input: to_udp_autohelm
+    server_address: 127.0.0.0:8006

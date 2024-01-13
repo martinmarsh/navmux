@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 Martin Marsh martin@marshtrio.com
+Copyright © 2024 Martin Marsh martin@marshtrio.com
 
 */
 
@@ -7,12 +7,8 @@ package mux
 
 import (
 	"fmt"
-	"navmux/io"
-	"os"
 	"time"
 	"os/exec"
-
-	"github.com/stianeikeland/go-rpio/v4"
 )
 
 type ConfigData struct {
@@ -48,18 +44,6 @@ func Execute(config *ConfigData) {
 		}
 	}
 
-	if err := rpio.Open(); err != nil {
-		fmt.Println("RPIO - could not be openned")
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	defer rpio.Close()
-
-	 if err := io.Init(&channels); err != nil {
-		fmt.Println("Failed to set up gpio")
-		panic("error GPIO")
-	}
-
 	for processType, names := range config.TypeList {
 		fmt.Println(processType, names)
 		for _, name := range names {
@@ -68,40 +52,17 @@ func Execute(config *ConfigData) {
 				serialProcess(name, config.Values[name], &channels)
 			case "udp_client":
 				udpClientProcess(name, config.Values[name], &channels)
-			case "keyboard":
-				keyBoardProcess(name, config.Values[name], &channels)
 			case "ships_log":
-				shipsLogProcess(name, config.Values[name], &channels)
-			case "auto-helm":
-				autoHelmProcess(name, config.Values[name], &channels)
-					
+				shipsLogProcess(name, config.Values[name], &channels)	
 			}
 		}
 	}
 
 	
-	io.Beep("1s")
-	
 	for {
 		command := <-(channels["command"])
 		fmt.Printf("Command '%s' received\n", command)
-		if command == "99" {
-			io.Beep("2l")
-			Exit()
-		} else if len(command) > 1 && len(command) <=5 {
-			switch command[0]{
-			case '1':
-				channels["to_helm"] <- "P" + command[1:]
-			case '2':
-				channels["to_helm"] <- "I" + command[1:]
-			case '3':
-				channels["to_helm"] <- "D" + command[1:]
-			case '4':
-				channels["to_helm"] <- "G" + command[1:]
-			}
-			
-				
-		}
+		
 	}
 }
 
