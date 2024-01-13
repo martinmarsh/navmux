@@ -1,4 +1,4 @@
-module main
+module navmux
 
 go 1.21.6
 

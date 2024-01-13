@@ -42,4 +42,4 @@ udp_opencpn:
 udp_autohelm:
     type:  udp_client
     input: to_udp_autohelm
-    server_address: 127.0.0.0:8007
+    server_address: 127.0.0.0:8006
