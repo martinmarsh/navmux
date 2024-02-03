@@ -2,15 +2,33 @@
 # Reserved channels:
 # command       used for keyboard commands
 # so these channels should not be used in inputs or outputs below
-compass:
-    name: /dev/ttyUSB0
-    type: serial
-    baud:  4800
+udp_monitor:
+    type: udp_monitor
+    input: to_monitor
+    server_address: 192.168.1.166:8004
+
+udp_remote_compass:
+    type:  udp_listen
+    outputs:
+        - to_head_resolve
+    port: 8005
+
+compass_resolve:
+    type: compass_resolver
+    input:
+        to_head_resolve
     outputs:
       - to_log
       - to_udp_autohelm
       - to_2000
       - to_udp_client
+
+compass:
+    name: /dev/ttyUSB0
+    type: serial
+    baud:  4800
+    outputs:
+      - to_head_resolve
 
 bridge:
     name: /dev/ttyUSB1
@@ -42,4 +60,5 @@ udp_opencpn:
 udp_autohelm:
     type:  udp_client
     input: to_udp_autohelm
-    server_address: 127.0.0.0:8006
+    server_address: 127.0.0.0:8007
+

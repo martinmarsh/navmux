@@ -74,7 +74,7 @@ func parse(str string, handle *nmea0183.Handle) error{
 			fmt.Println("\n** Recover from NEMEA Panic **")
 		}
 	}()
-
+	str = strings.TrimSpace(str)
 	if len(str)>5 && len(str)<89 && str[0] == '$'{
 		// fmt.Printf("counter is %d\n", count)
 		_, _, error := handle.Parse(str)

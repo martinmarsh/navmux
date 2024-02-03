@@ -17,6 +17,18 @@ type ConfigData struct {
 	Values   map[string]map[string]([]string)
 }
 
+var Monitor_channel chan string
+var Udp_monitor_active bool
+
+func Monitor(str string, print bool, udp bool) {
+	if udp && Udp_monitor_active {
+		Monitor_channel <- str
+	}
+	if print {
+		fmt.Println(str)
+	}
+}
+
 func Execute(config *ConfigData) {
 	// wait for everything to connect on boot up
 	time.Sleep(5 * time.Second)
@@ -53,7 +65,12 @@ func Execute(config *ConfigData) {
 			case "udp_client":
 				udpClientProcess(name, config.Values[name], &channels)
 			case "ships_log":
-				shipsLogProcess(name, config.Values[name], &channels)	
+				shipsLogProcess(name, config.Values[name], &channels)
+			case "udp_listen":
+				udpListenerProcess(name, config.Values[name], &channels)
+			case "compass_resolver":
+				compassResolveProcess(name, config.Values[name], &channels)
+ 	
 			}
 		}
 	}

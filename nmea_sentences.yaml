@@ -34,6 +34,17 @@ formats:
   - mag_var
   hdm:
   - hdm
+  xs1:
+  - auto
+  - hdm2
+  - set_hdm
+  - compass_status
+  - pitch
+  - roll
+  - compass_temp
+  - auto_gain
+  - auto_pi
+  - auto_pd
   rmc:
   - fix_time
   - status
@@ -64,6 +75,10 @@ variables:
   aper: A
   arrival_radius: x.x
   arrived_circle: A
+  auto: x
+  auto_gain: x
+  auto_pi: x
+  auto_pd: x
   bearing_origin_to_waypt: xxx,T
   bearing_position_to_waypt: xxx,T
   bearing_to_waypt: xxx,T
@@ -74,10 +89,13 @@ variables:
   dbt: x.x
   did: c--c
   dw: x.x
+  compass_status: A
+  compass_temp: x
   faa_mode: A
   fix_date: ddmmyy
   fix_time: hhmmss.ss
   hdm: x.x,T
+  hdm2: x.x
   hts: xxx,T
   lat: lat,NS
   long: long,WE
@@ -86,7 +104,10 @@ variables:
   nav_status: A
   passed_waypt: A
   position: lat,NS,long,WE
+  pitch: -x
   radius_units: A
+  roll: -x
+  set_hdm: x.x
   sog: x.x
   status: A
   stw: x.x
@@ -96,3 +117,4 @@ variables:
   waypt_id: c--c
   xte: x.x,R,N
   year: DD_year
+ 
