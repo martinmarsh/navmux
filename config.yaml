@@ -30,7 +30,7 @@ ais:
       - to_2000
       - to_udp_opencpn
 
-processor:
+main_processor:
     type: processor
     input: to_processor
     log_period: 15   # zero means no log saved
@@ -63,6 +63,30 @@ processor:
             prefix: SD
             send_to:
                 - to_udp_opencpn
+
+
+backup_compass_processor:
+    type: processor
+    input: to_compass_backup
+    log_period: 15   # zero means no log saved
+    data_retain: 15  # number of seconds before old records are removed
+    outputs:         # this list ensures the channels are created
+        - to_2000
+        - to_udp_opencpn
+        - to_udp_autohelm
+    0183_generators:    # routes from database
+        hdm:
+            every: 2     # every is in periods of 100ms ie 2 = 200ms
+            prefix: HF   # prefix so message generated starts with $HFHDM
+            alternative: # Build sentence with a different data variable (must be same format)
+               hdm: 
+                    replace_with: hdm2  # hdm variable will be replaced with hdm2 value if present
+                    if: compass_status == 3333  # but only if compass_status is 3333 note must use spaces around ==
+                    and: auto == 1              # and auto == 1
+            send_to:
+                - to_2000
+                - to_udp_opencpn
+                - to_udp_autohelm
 
 udp_opencpn:
     type:  udp_client
