@@ -7,22 +7,6 @@ udp_monitor:
     input: to_monitor
     server_address: 192.168.1.166:8004
 
-udp_remote_compass:
-    type:  udp_listen
-    outputs:
-        - to_head_resolve
-    port: 8005
-
-compass_resolve:
-    type: compass_resolver
-    input:
-        to_head_resolve
-    outputs:
-      - to_log
-      - to_udp_autohelm
-      - to_2000
-      - to_udp_client
-
 compass:
     name: /dev/ttyUSB0
     type: serial
@@ -36,9 +20,7 @@ bridge:
     baud: 38400
     input: to_2000
     outputs:
-      - to_log
-      - to_udp_client
-
+      - to_processor
 
 ais:
     name: /dev/ttyUSB3
@@ -46,15 +28,45 @@ ais:
     baud: 38400
     outputs:
       - to_2000
-      - to_udp_client
+      - to_udp_opencpn
 
-log:
-    type: ships_log
-    input: to_log
+processor:
+    type: processor
+    input: to_processor
+    log_period: 15   # zero means no log saved
+    data_retain: 15  # number of seconds before old records are removed
+    outputs:         # this list ensures the channels are created
+        - to_2000
+        - to_udp_opencpn
+        - to_udp_autohelm
+    0183_generators:    # routes from database
+        hdm:
+            every: 2     # every is in periods of 100ms ie 2 = 200ms
+            prefix: HF   # prefix so message generated starts with $HFHDM
+            alternative: # Build sentence with a different data variable (must be same format)
+               hdm: 
+                    replace_with: hdm2  # hdm variable will be replaced with hdm2 value if present
+                    if: compass_status == 3333  # but only if compass_status is 3333 note must use spaces around ==
+                    and: auto == 1              # and auto == 1
+            send_to:
+                - to_2000
+                - to_udp_opencpn
+                - to_udp_autohelm
+        rmc:
+            every: 15
+            prefix: DP
+            send_to:
+                - to_udp_opencpn
+                - to_2000
+        dpt:
+            every: 10
+            prefix: SD
+            send_to:
+                - to_udp_opencpn
 
 udp_opencpn:
     type:  udp_client
-    input: to_udp_client
+    input: to_udp_opencpn
     server_address: 192.168.1.14:8011
 
 udp_autohelm:

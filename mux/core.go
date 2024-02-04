@@ -64,8 +64,8 @@ func Execute(config *ConfigData) {
 				serialProcess(name, config.Values[name], &channels)
 			case "udp_client":
 				udpClientProcess(name, config.Values[name], &channels)
-			case "ships_log":
-				shipsLogProcess(name, config.Values[name], &channels)
+			case "processor":
+				processorProcess(name, config.Values[name], &channels)
 			case "udp_listen":
 				udpListenerProcess(name, config.Values[name], &channels)
 			case "compass_resolver":
