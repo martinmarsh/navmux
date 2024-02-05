@@ -21,13 +21,19 @@ func udpListenerProcess(name string, config map[string][]string, channels *map[s
 	}
 	Monitor(fmt.Sprintf("Upd_listen; name: %s  Port: %s channels: %s",name, server_port, to_chans), true, true)
 
+	tag:= ""
+
+	if config["origin_tag"] != nil {
+		tag = fmt.Sprintf("@%s@", config["origin_tag"])
+	}
+
 	if len(config["outputs"]) > 0 {
-		go udpListener(name, server_port, config["outputs"], channels)
+		go udpListener(name, server_port, config["outputs"], tag,  channels)
 	}
 	
 }
 
-func udpListener(name string, server_port string, outputs []string, channels *map[string](chan string)) {
+func udpListener(name string, server_port string, outputs []string, tag string, channels *map[string](chan string)) {
 	const maxBufferSize = 1024
 	pc, err := net.ListenPacket("udp", "0.0.0.0:"+server_port)
 	if err != nil {
@@ -47,7 +53,7 @@ func udpListener(name string, server_port string, outputs []string, channels *ma
 	
 		} else {
 			for _, out := range outputs {
-				(*channels)[out] <- string(buffer[:n])
+				(*channels)[out] <- tag + string(buffer[:n])
 			}
 		}
 

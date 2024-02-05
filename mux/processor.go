@@ -30,6 +30,13 @@ type GENERATE struct {
 	prefix  string
 	every int
 	send_to [] string
+	origin_tag string
+	else_origin_tag string
+	then_origin_tag string
+	or_if  [] string
+	and_if  []string
+	
+
 	alternatives map[string] *ALTERNATIVE
 }
 
@@ -54,6 +61,21 @@ func processorProcess(name string, config map[string][]string, channels *map[str
 					generators[key[1]].prefix = value[0]
 				case "send_to":
 					generators[key[1]].send_to = value
+
+				case "use_origin_tag":
+					generators[key[1]].origin_tag = value[0]
+
+				case "then_origin_tag":
+					generators[key[1]].then_origin_tag = value[0]
+
+				case "else_origin_tag":
+					generators[key[1]].else_origin_tag = value[0]
+				
+				case "if":
+					generators[key[1]].and_if = value
+					
+
+
 				case "alternative":
 					if generators[key[1]].alternatives[key[j+1]] == nil {
 						generators[key[1]].alternatives[key[j+1]] = &ALTERNATIVE{variable: key[j+1]}
@@ -63,13 +85,8 @@ func processorProcess(name string, config map[string][]string, channels *map[str
 						generators[key[1]].alternatives[key[j-1]] = &ALTERNATIVE{variable: key[j+1]}
 					}
 					generators[key[1]].alternatives[key[j-1]].replace_with = value[0]
-				case "if":
-					fmt.Printf("if %s - %s\n", key[j-1], value) 
-				case "and":
-					fmt.Printf("and %s - %s\n", key[j-1], value)
-				case "or":
-					fmt.Printf("or %s - %s\n", key[j-1], value)
-
+				
+				
 				default:
 					fmt.Printf("missed %s - %s\n", key[j], key[1]) 
 				}
@@ -99,7 +116,7 @@ func fileLogger(name string, input string, channels *map[string](chan string)){
 	for {
 		select {
 		case str := <-(*channels)[input]:
-			parse(str, handle)
+			parse(str, "", handle)
 		case <-ticker.C:
 			data_map := handle.GetMap()
 			
@@ -134,7 +151,7 @@ func fileLogger(name string, input string, channels *map[string](chan string)){
 	}
 }
 
-func parse(str string, handle *nmea0183.Handle) error{
+func parse(str string, tag string, handle *nmea0183.Handle) error{
 
 	defer func(){
 		if r := recover(); r != nil {
@@ -142,10 +159,11 @@ func parse(str string, handle *nmea0183.Handle) error{
 			fmt.Println("\n** Recover from NEMEA Panic **")
 		}
 	}()
+
 	str = strings.TrimSpace(str)
 	if len(str)>5 && len(str)<89 && str[0] == '$'{
 		// fmt.Printf("counter is %d\n", count)
-		_, _, error := handle.Parse(str)
+		_, _, error := handle.ParsePrefixVar(str, tag)
 		return error
 	}
 	return fmt.Errorf("%s", "no leading dollar")

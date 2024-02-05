@@ -24,12 +24,19 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 	}
 	portName := config["name"][0]
 	port, err := serial.Open(portName, mode)
+	
+	tag:= ""
+
+	if config["origin_tag"] != nil {
+		tag = fmt.Sprintf("@%s@", config["origin_tag"])
+	}
+
 	if err != nil {
 		fmt.Println("no serial port " + portName)
 	} else {
 		if len(config["outputs"]) > 0 {
 			fmt.Println("Open read serial port " + portName)
-			go serialReader(name, port, config["outputs"], channels)
+			go serialReader(name, port, config["outputs"], tag, channels)
 
 		}
 		if len(config["input"]) > 0 {
@@ -41,7 +48,7 @@ func serialProcess(name string, config map[string][]string, channels *map[string
 
 }
 
-func serialReader(name string, port serial.Port, outputs []string, channels *map[string](chan string)) {
+func serialReader(name string, port serial.Port, outputs []string, tag string, channels *map[string](chan string)) {
 	buff := make([]byte, 25)
 	cb := buffer.MakeByteBuffer(400, 92)
 	time.Sleep(100 * time.Millisecond)
@@ -66,6 +73,7 @@ func serialReader(name string, port serial.Port, outputs []string, channels *map
 			if len(str) == 0 {
 				break
 			}
+			str = tag + str
 			for _, out := range outputs {
 				(*channels)[out] <- str
 			}

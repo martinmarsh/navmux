@@ -11,12 +11,23 @@ compass:
     name: /dev/ttyUSB0
     type: serial
     baud:  4800
+    origin_tag: cp_
     outputs:
-      - to_head_resolve
+      - to_processor
+
+gps:_backup:
+    name: /dev/ttyUSB2
+    type: serial
+    baud: 38400
+    origin_tag: gm_
+    input: to_2000
+    outputs:
+      - to_processor
 
 bridge:
     name: /dev/ttyUSB1
     type: serial
+    origin_tag: ray_
     baud: 38400
     input: to_2000
     outputs:
@@ -30,9 +41,18 @@ ais:
       - to_2000
       - to_udp_opencpn
 
+udp_compass_listen:
+    type:  udp_listen
+    origin_tag: esp_
+    outputs:
+        - to_course
+    port: 8006
+
+
 main_processor:
     type: processor
-    input: to_processor
+    input: to_processor  # NMEA data received will be stored to data base and tagged with origin prefix
+                         # if applied by the origin channel
     log_period: 15   # zero means no log saved
     data_retain: 15  # number of seconds before old records are removed
     outputs:         # this list ensures the channels are created
@@ -40,14 +60,14 @@ main_processor:
         - to_udp_opencpn
         - to_udp_autohelm
     0183_generators:    # routes from database
-        hdm:
-            every: 2     # every is in periods of 100ms ie 2 = 200ms
-            prefix: HF   # prefix so message generated starts with $HFHDM
-            alternative: # Build sentence with a different data variable (must be same format)
-               hdm: 
-                    replace_with: hdm2  # hdm variable will be replaced with hdm2 value if present
-                    if: compass_status == 3333  # but only if compass_status is 3333 note must use spaces around ==
-                    and: auto == 1              # and auto == 1
+        hdm:                # Write a hdm message from stored data
+            every: 200      # 200ms is minium period between sends
+            prefix: HF      # prefix so message generated starts with $HFHDM
+            use_origin_tag: cp_        # selects data tagged from esp_ source
+            if: 
+                - esp_compass_status == 3333  # but only if compass_status is 3333 note must use spaces around ==
+                - esp_auto == 1               # and auto == 1
+            then_origin_tag: esp_             # selects data tagged from esp_ source
             send_to:
                 - to_2000
                 - to_udp_opencpn
@@ -55,38 +75,17 @@ main_processor:
         rmc:
             every: 15
             prefix: DP
+            use_origin_tag: ray_ 
+            else_origin_tag: gm     
             send_to:
                 - to_udp_opencpn
                 - to_2000
         dpt:
             every: 10
             prefix: SD
+            use_origin_tag: ray_ 
             send_to:
                 - to_udp_opencpn
-
-
-backup_compass_processor:
-    type: processor
-    input: to_compass_backup
-    log_period: 15   # zero means no log saved
-    data_retain: 15  # number of seconds before old records are removed
-    outputs:         # this list ensures the channels are created
-        - to_2000
-        - to_udp_opencpn
-        - to_udp_autohelm
-    0183_generators:    # routes from database
-        hdm:
-            every: 2     # every is in periods of 100ms ie 2 = 200ms
-            prefix: HF   # prefix so message generated starts with $HFHDM
-            alternative: # Build sentence with a different data variable (must be same format)
-               hdm: 
-                    replace_with: hdm2  # hdm variable will be replaced with hdm2 value if present
-                    if: compass_status == 3333  # but only if compass_status is 3333 note must use spaces around ==
-                    and: auto == 1              # and auto == 1
-            send_to:
-                - to_2000
-                - to_udp_opencpn
-                - to_udp_autohelm
 
 udp_opencpn:
     type:  udp_client
@@ -97,4 +96,3 @@ udp_autohelm:
     type:  udp_client
     input: to_udp_autohelm
     server_address: 127.0.0.0:8007
-

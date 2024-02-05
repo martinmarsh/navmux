@@ -68,9 +68,6 @@ func Execute(config *ConfigData) {
 				processorProcess(name, config.Values[name], &channels)
 			case "udp_listen":
 				udpListenerProcess(name, config.Values[name], &channels)
-			case "compass_resolver":
-				compassResolveProcess(name, config.Values[name], &channels)
- 	
 			}
 		}
 	}

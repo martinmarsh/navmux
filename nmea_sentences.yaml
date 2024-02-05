@@ -36,7 +36,7 @@ formats:
   - hdm
   xs1:
   - auto
-  - hdm2
+  - hdm
   - set_hdm
   - compass_status
   - pitch
@@ -95,7 +95,6 @@ variables:
   fix_date: ddmmyy
   fix_time: hhmmss.ss
   hdm: x.x,T
-  hdm2: x.x
   hts: xxx,T
   lat: lat,NS
   long: long,WE
