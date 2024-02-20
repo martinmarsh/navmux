@@ -1,6 +1,38 @@
 monitor:
     type: monitor
 
+compass:
+    name: /dev/ttyUSB0
+    type: serial
+    origin_tag: cp_
+    outputs:
+      - to_processor
+
+gps:_backup:
+    name: /dev/ttyUSB2
+    type: serial
+    baud: 38400
+    origin_tag: gm_
+    input: to_local_gps
+    outputs:
+      - to_processor
+
+bridge:
+    name: /dev/ttyUSB1
+    type: serial
+    origin_tag: ray_
+    baud: 38400
+    input: to_2000
+    outputs:
+      - to_processor
+
+ais:
+    name: /dev/ttyUSB3
+    type: serial
+    baud: 38400
+    outputs:
+      - to_2000
+      - to_udp_opencpn
 
 udp_compass_listen:
     type:  udp_listen
@@ -13,7 +45,7 @@ main_processor:
     type: nmea_processor # Links to any make_sentence types with processor field referring to this processor
     input: to_processor  # NMEA data received will be stored to data base and tagged with origin prefix
                          # if applied by the origin channel
-    log_period: 15   # zero means no log saved
+    log_period: 15    # zero means no log saved
     data_retain: 15  # number of seconds before old records are removed
       
 compass_out:
@@ -30,6 +62,7 @@ compass_out:
     then_origin_tag: esp_             # selects data tagged from esp_ source
     outputs:
     - to_udp_opencpn
+    - to_2000
     - to_udp_autohelm
     
 gps_out:
@@ -42,6 +75,8 @@ gps_out:
     else_origin_tag: gm_     
     outputs:
         - to_udp_opencpn
+        - to_2000
+        - to_local_gps
     
 depth_out:
     type: make_sentence
@@ -52,6 +87,7 @@ depth_out:
     use_origin_tag: ray_ 
     outputs:
         - to_udp_opencpn
+        - to_2000
 
 udp_opencpn:
     type:  udp_client

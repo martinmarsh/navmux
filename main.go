@@ -6,7 +6,7 @@ package main
 
 import (
 	"navmux/cmd"
-) 
+)
 
 func main() {
 	cmd.Execute()

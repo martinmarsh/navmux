@@ -7,7 +7,6 @@ package cmd
 
 import (
 	"fmt"
-	"navmux/mux"
 	"navmux/version"
 	"os"
 
@@ -75,7 +74,7 @@ var runCmd = &cobra.Command{
 			fmt.Println("\nStarting Navmux\nruns until aborted")
 		}
 
-		mux.Execute(loadConfig())
+		load_and_run()
 
 	},
 }
