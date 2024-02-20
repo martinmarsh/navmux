@@ -1,6 +1,6 @@
 package version
 
 var (
-	BuildVersion string = "v0.1.0"
-	BuildTime    string = "Development"
+	BuildVersion string = "v0.2.0"
+	BuildTime    string = "Nmea-Mux lib version"
 )
