@@ -106,7 +106,7 @@ variables:
   pitch: -x
   radius_units: A
   roll: -x
-  set_hdm: x.x
+  set_hdm: x.x,T
   sog: x.x
   status: A
   stw: x.x

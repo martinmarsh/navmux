@@ -92,7 +92,7 @@ depth_out:
 udp_opencpn:
     type:  udp_client
     input: to_udp_opencpn
-    server_address: 192.168.1.14:8011
+    server_address: 192.168.1.27:8011
 
 udp_autohelm:
     type:  udp_client
